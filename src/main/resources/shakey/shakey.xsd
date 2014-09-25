@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    attributeFormDefault="unqualified"
+    elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    id="sync">
+  <xs:element name="shakey" type="shakeyType"/>
+  <xs:complexType name="shakeyType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="log_file" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>配置日志文件的路径</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="xs:string" name="ib_account" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>配置IB账户信息</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="xs:string" name="ib_api_host" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>配置IB API的地址</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="xs:string" name="ib_api_port" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>配置IB API的端口</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,6 @@
+<shakey>
+  <log_file>${server.home}/log/shakey.log</log_file>
+  <ib_account>xxx</ib_account>
+  <ib_api_host>localhost</ib_api_host>
+  <ib_api_port>4000</ib_api_port>
+</shakey>
