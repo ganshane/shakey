@@ -22,10 +22,10 @@ public class NewContract implements Cloneable {
     private Right m_right = Right.None;
     private String m_multiplier; // should be double
     private String m_exchange;
+    private String m_primaryExch;
     private String m_currency;
     private String m_localSymbol;
     private String m_tradingClass;
-    private String m_primaryExch;
     private SecIdType m_secIdType = SecIdType.None;
     private String m_secId;
     public DeltaNeutralContract m_underComp;    // what is this?
@@ -37,11 +37,11 @@ public class NewContract implements Cloneable {
     public SecType secType() { return m_secType; }
     public String currency() { return m_currency; }
     public String exchange() { return m_exchange; }
+    public String primaryExch() { return m_primaryExch; }
     public String expiry() { return m_expiry; }
     public String localSymbol() { return m_localSymbol; }
     public String tradingClass() { return m_tradingClass; }
     public String multiplier() { return m_multiplier; }
-    public String primaryExch() { return m_primaryExch; }
     public Right right() { return m_right; }
     public String secId() { return m_secId; }
     public String symbol() { return m_symbol; }
@@ -78,10 +78,10 @@ public class NewContract implements Cloneable {
     	m_right = Right.get( c.m_right);
     	m_multiplier = c.m_multiplier;
     	m_exchange = c.m_exchange;
+    	m_primaryExch = c.m_primaryExch;
     	m_currency = c.m_currency;
     	m_localSymbol = c.m_localSymbol;
     	m_tradingClass = c.m_tradingClass;
-    	m_primaryExch = c.m_primaryExch;
     	m_secIdType = SecIdType.get( c.m_secIdType);
     	m_secId = c.m_secId;
     	m_underComp = c.m_underComp != null ? new DeltaNeutralContract( c.m_underComp.m_conId, c.m_underComp.m_delta, c.m_underComp.m_price) : null;
@@ -104,6 +104,7 @@ public class NewContract implements Cloneable {
 		c.m_right = m_right.getApiString();
 		c.m_multiplier = m_multiplier;
 		c.m_exchange = m_exchange;
+		c.m_primaryExch = m_primaryExch;
 		c.m_currency = m_currency;
 		c.m_localSymbol = m_localSymbol;
 		c.m_tradingClass = m_tradingClass;

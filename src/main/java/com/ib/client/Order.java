@@ -146,6 +146,9 @@ public class Order {
     // order combo legs
     public Vector<OrderComboLeg> m_orderComboLegs = new Vector<OrderComboLeg>();
 
+    // order misc options
+    public Vector<TagValue> m_orderMiscOptions;
+    
     public Order() {
         m_lmtPrice = Double.MAX_VALUE;
         m_auxPrice = Double.MAX_VALUE;

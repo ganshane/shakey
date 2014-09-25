@@ -8,6 +8,8 @@ import java.io.DataOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
+import java.util.Vector;
 
 public class EClientSocket {
 
@@ -90,8 +92,9 @@ public class EClientSocket {
 	// 61 = can receive multiplier in openOrder
 	//      can receive tradingClass in openOrder, updatePortfolio, execDetails and position
 	// 62 = can receive avgCost in position message
+	// 63 = can receive verifyMessageAPI, verifyCompleted, displayGroupList and displayGroupUpdated messages
 
-    private static final int CLIENT_VERSION = 62;
+    private static final int CLIENT_VERSION = 63;
     private static final int SERVER_VERSION = 38;
     private static final byte[] EOL = {0};
     private static final String BAG_SEC_TYPE = "BAG";
@@ -154,6 +157,13 @@ public class EClientSocket {
     private static final int REQ_ACCOUNT_SUMMARY = 62;
     private static final int CANCEL_ACCOUNT_SUMMARY = 63;
     private static final int CANCEL_POSITIONS = 64;
+    private static final int VERIFY_REQUEST = 65;
+    private static final int VERIFY_MESSAGE = 66;
+    private static final int QUERY_DISPLAY_GROUPS = 67;
+    private static final int SUBSCRIBE_TO_GROUP_EVENTS = 68;
+    private static final int UPDATE_DISPLAY_GROUP = 69;
+    private static final int UNSUBSCRIBE_FROM_GROUP_EVENTS = 70;
+    private static final int START_API = 71;
 
 	private static final int MIN_SERVER_VER_REAL_TIME_BARS = 34;
 	private static final int MIN_SERVER_VER_SCALE_ORDERS = 35;
@@ -191,6 +201,7 @@ public class EClientSocket {
     private static final int MIN_SERVER_VER_ACCT_SUMMARY = 67;
     protected static final int MIN_SERVER_VER_TRADING_CLASS = 68;
     protected static final int MIN_SERVER_VER_SCALE_TABLE = 69;
+    protected static final int MIN_SERVER_VER_LINKING = 70;
 
     private AnyWrapper m_anyWrapper;    // msg handler
     protected DataOutputStream m_dos;   // the socket output stream
@@ -198,6 +209,8 @@ public class EClientSocket {
     private EReader m_reader;           // thread which reads msgs from socket
     protected int m_serverVersion;
     private String m_TwsTime;
+    private int m_clientId;
+    private boolean m_extraAuth;
 
     public int serverVersion()          { return m_serverVersion;   }
     public String TwsConnectionTime()   { return m_TwsTime; }
@@ -205,20 +218,35 @@ public class EClientSocket {
     public EReader reader()             { return m_reader; }
     public boolean isConnected() 		{ return m_connected; }
 
+    protected synchronized void setExtraAuth(boolean extraAuth){
+        m_extraAuth = extraAuth;
+    }
 
     public EClientSocket( AnyWrapper anyWrapper) {
         m_anyWrapper = anyWrapper;
+        m_clientId = -1;
+        m_extraAuth = false;
+        m_connected = false;
+        m_serverVersion = 0;
     }
-
+    
     public synchronized void eConnect( String host, int port, int clientId) {
+        eConnect(host, port, clientId, false);
+    }
+    
+    public synchronized void eConnect( String host, int port, int clientId, boolean extraAuth) {
         // already connected?
         host = checkConnected(host);
+
+        m_clientId = clientId;
+        m_extraAuth = extraAuth;
+
         if(host == null){
             return;
         }
         try{
             Socket socket = new Socket( host, port);
-            eConnect(socket, clientId);
+            eConnect(socket);
         }
         catch( Exception e) {
         	eDisconnect();
@@ -249,6 +277,11 @@ public class EClientSocket {
     }
 
     public synchronized void eConnect(Socket socket, int clientId) throws IOException {
+        m_clientId = clientId;
+        eConnect(socket);
+    }
+    
+    public synchronized void eConnect(Socket socket) throws IOException {
 
         // create io streams
         m_dos = new DataOutputStream( socket.getOutputStream() );
@@ -273,15 +306,21 @@ public class EClientSocket {
             return;
         }
 
+        // set connected flag
+        m_connected = true;
+
         // Send the client id
         if ( m_serverVersion >= 3 ){
-            send( clientId);
+            if ( m_serverVersion < MIN_SERVER_VER_LINKING) {
+                send( m_clientId);
+            }
+            else if (!m_extraAuth){
+                startAPI();
+             }
         }
 
         m_reader.start();
 
-        // set connected flag
-        m_connected = true;
     }
 
     public synchronized void eDisconnect() {
@@ -291,6 +330,8 @@ public class EClientSocket {
         }
 
         m_connected = false;
+        m_extraAuth = false;
+        m_clientId = -1;
         m_serverVersion = 0;
         m_TwsTime = "";
 
@@ -316,6 +357,27 @@ public class EClientSocket {
             }
         }
         catch( Exception e) {
+        }
+    }
+
+    protected synchronized void startAPI() {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return;
+        }
+
+        final int VERSION = 1;
+
+        try {
+            send(START_API);
+            send(VERSION);
+            send(m_clientId);
+        }
+        catch( Exception e) {
+            error( EClientErrors.NO_VALID_ID,
+                   EClientErrors.FAIL_SEND_STARTAPI, "" + e);
+            close();
         }
     }
 
@@ -372,7 +434,7 @@ public class EClientSocket {
         }
     }
 
-    public synchronized void reqScannerSubscription( int tickerId, ScannerSubscription subscription) {
+    public synchronized void reqScannerSubscription( int tickerId, ScannerSubscription subscription, Vector<TagValue> scannerSubscriptionOptions) {
         // not connected?
         if( !m_connected) {
             notConnected();
@@ -385,7 +447,7 @@ public class EClientSocket {
           return;
         }
 
-        final int VERSION = 3;
+        final int VERSION = 4;
 
         try {
             send(REQ_SCANNER_SUBSCRIPTION);
@@ -416,6 +478,23 @@ public class EClientSocket {
             if (m_serverVersion >= 27) {
                 send(subscription.stockTypeFilter());
             }
+            
+            // send scannerSubscriptionOptions parameter
+            if(m_serverVersion >= MIN_SERVER_VER_LINKING) {
+                StringBuilder scannerSubscriptionOptionsStr = new StringBuilder();
+                int scannerSubscriptionOptionsCount = scannerSubscriptionOptions == null ? 0 : scannerSubscriptionOptions.size();
+                if( scannerSubscriptionOptionsCount > 0) {
+                    for( int i = 0; i < scannerSubscriptionOptionsCount; ++i) {
+                        TagValue tagValue = (TagValue)scannerSubscriptionOptions.get(i);
+                        scannerSubscriptionOptionsStr.append( tagValue.m_tag);
+                        scannerSubscriptionOptionsStr.append( "=");
+                        scannerSubscriptionOptionsStr.append( tagValue.m_value);
+                        scannerSubscriptionOptionsStr.append( ";");
+                    }
+                }
+                send( scannerSubscriptionOptionsStr.toString());
+            }
+            
         }
         catch( Exception e) {
             error( tickerId, EClientErrors.FAIL_SEND_REQSCANNER, "" + e);
@@ -424,7 +503,7 @@ public class EClientSocket {
     }
 
     public synchronized void reqMktData(int tickerId, Contract contract,
-    		String genericTickList, boolean snapshot) {
+    		String genericTickList, boolean snapshot, List<TagValue> mktDataOptions) {
         if (!m_connected) {
             error(EClientErrors.NO_VALID_ID, EClientErrors.NOT_CONNECTED, "");
             return;
@@ -460,7 +539,7 @@ public class EClientSocket {
             }
         }
 
-        final int VERSION = 10;
+        final int VERSION = 11;
 
         try {
             // send req mkt data msg
@@ -535,6 +614,23 @@ public class EClientSocket {
             if (m_serverVersion >= MIN_SERVER_VER_SNAPSHOT_MKT_DATA) {
             	send (snapshot);
             }
+            
+            // send mktDataOptions parameter
+            if(m_serverVersion >= MIN_SERVER_VER_LINKING) {
+                StringBuilder mktDataOptionsStr = new StringBuilder();
+                int mktDataOptionsCount = mktDataOptions == null ? 0 : mktDataOptions.size();
+                if( mktDataOptionsCount > 0) {
+                    for( int i = 0; i < mktDataOptionsCount; ++i) {
+                        TagValue tagValue = (TagValue)mktDataOptions.get(i);
+                        mktDataOptionsStr.append( tagValue.m_tag);
+                        mktDataOptionsStr.append( "=");
+                        mktDataOptionsStr.append( tagValue.m_value);
+                        mktDataOptionsStr.append( ";");
+                    }
+                }
+                send( mktDataOptionsStr.toString());
+            }
+            
         }
         catch( Exception e) {
             error( tickerId, EClientErrors.FAIL_SEND_REQMKT, "" + e);
@@ -600,14 +696,14 @@ public class EClientSocket {
     public synchronized void reqHistoricalData( int tickerId, Contract contract,
                                                 String endDateTime, String durationStr,
                                                 String barSizeSetting, String whatToShow,
-                                                int useRTH, int formatDate) {
+                                                int useRTH, int formatDate, List<TagValue> chartOptions) {
         // not connected?
         if( !m_connected) {
             notConnected();
             return;
         }
 
-        final int VERSION = 5;
+        final int VERSION = 6;
 
         try {
           if (m_serverVersion < 16) {
@@ -675,6 +771,23 @@ public class EClientSocket {
                   }
               }
           }
+          
+          // send chartOptions parameter
+          if(m_serverVersion >= MIN_SERVER_VER_LINKING) {
+              StringBuilder chartOptionsStr = new StringBuilder();
+              int chartOptionsCount = chartOptions == null ? 0 : chartOptions.size();
+              if( chartOptionsCount > 0) {
+                  for( int i = 0; i < chartOptionsCount; ++i) {
+                      TagValue tagValue = (TagValue)chartOptions.get(i);
+                      chartOptionsStr.append( tagValue.m_tag);
+                      chartOptionsStr.append( "=");
+                      chartOptionsStr.append( tagValue.m_value);
+                      chartOptionsStr.append( ";");
+                  }
+              }
+              send( chartOptionsStr.toString());
+          }
+          
         }
         catch (Exception e) {
           error(tickerId, EClientErrors.FAIL_SEND_REQHISTDATA, "" + e);
@@ -682,7 +795,7 @@ public class EClientSocket {
         }
     }
 
-    public synchronized void reqRealTimeBars(int tickerId, Contract contract, int barSize, String whatToShow, boolean useRTH) {
+    public synchronized void reqRealTimeBars(int tickerId, Contract contract, int barSize, String whatToShow, boolean useRTH, Vector<TagValue> realTimeBarsOptions) {
         // not connected?
         if( !m_connected) {
             notConnected();
@@ -702,7 +815,7 @@ public class EClientSocket {
             }
         }
 
-        final int VERSION = 2;
+        final int VERSION = 3;
 
         try {
             // send req mkt data msg
@@ -731,6 +844,22 @@ public class EClientSocket {
             send(whatToShow);
             send(useRTH);
 
+            // send realTimeBarsOptions parameter
+            if(m_serverVersion >= MIN_SERVER_VER_LINKING) {
+                StringBuilder realTimeBarsOptionsStr = new StringBuilder();
+                int realTimeBarsOptionsCount = realTimeBarsOptions == null ? 0 : realTimeBarsOptions.size();
+                if( realTimeBarsOptionsCount > 0) {
+                    for( int i = 0; i < realTimeBarsOptionsCount; ++i) {
+                        TagValue tagValue = (TagValue)realTimeBarsOptions.get(i);
+                        realTimeBarsOptionsStr.append( tagValue.m_tag);
+                        realTimeBarsOptionsStr.append( "=");
+                        realTimeBarsOptionsStr.append( tagValue.m_value);
+                        realTimeBarsOptionsStr.append( ";");
+                    }
+                }
+                send( realTimeBarsOptionsStr.toString());
+            }
+            
         }
         catch( Exception e) {
             error( tickerId, EClientErrors.FAIL_SEND_REQRTBARS, "" + e);
@@ -812,7 +941,7 @@ public class EClientSocket {
         }
     }
 
-    public synchronized void reqMktDepth( int tickerId, Contract contract, int numRows) {
+    public synchronized void reqMktDepth( int tickerId, Contract contract, int numRows, Vector<TagValue> mktDepthOptions) {
         // not connected?
         if( !m_connected) {
             notConnected();
@@ -834,7 +963,7 @@ public class EClientSocket {
             }
         }
 
-        final int VERSION = 4;
+        final int VERSION = 5;
 
         try {
             // send req mkt data msg
@@ -863,6 +992,23 @@ public class EClientSocket {
             if (m_serverVersion >= 19) {
                 send( numRows);
             }
+            
+            // send mktDepthOptions parameter
+            if(m_serverVersion >= MIN_SERVER_VER_LINKING) {
+                StringBuilder mktDepthOptionsStr = new StringBuilder();
+                int mktDepthOptionsCount = mktDepthOptions == null ? 0 : mktDepthOptions.size();
+                if( mktDepthOptionsCount > 0) {
+                    for( int i = 0; i < mktDepthOptionsCount; ++i) {
+                        TagValue tagValue = (TagValue)mktDepthOptions.get(i);
+                        mktDepthOptionsStr.append( tagValue.m_tag);
+                        mktDepthOptionsStr.append( "=");
+                        mktDepthOptionsStr.append( tagValue.m_value);
+                        mktDepthOptionsStr.append( ";");
+                    }
+                }
+                send( mktDepthOptionsStr.toString());
+            }
+            
         }
         catch( Exception e) {
             error( tickerId, EClientErrors.FAIL_SEND_REQMKTDEPTH, "" + e);
@@ -1180,7 +1326,7 @@ public class EClientSocket {
             }
         }
 
-        int VERSION = (m_serverVersion < MIN_SERVER_VER_NOT_HELD) ? 27 : 41;
+        int VERSION = (m_serverVersion < MIN_SERVER_VER_NOT_HELD) ? 27 : 42;
 
         // send place order msg
         try {
@@ -1505,6 +1651,24 @@ public class EClientSocket {
            if (m_serverVersion >= MIN_SERVER_VER_WHAT_IF_ORDERS) {
         	   send (order.m_whatIf);
            }
+           
+           // send orderMiscOptions parameter
+           if(m_serverVersion >= MIN_SERVER_VER_LINKING) {
+               StringBuilder orderMiscOptionsStr = new StringBuilder();
+               java.util.Vector orderMiscOptions = order.m_orderMiscOptions;
+               int orderMiscOptionsCount = orderMiscOptions == null ? 0 : orderMiscOptions.size();
+               if( orderMiscOptionsCount > 0) {
+                   for( int i = 0; i < orderMiscOptionsCount; ++i) {
+                       TagValue tagValue = (TagValue)orderMiscOptions.get(i);
+                       orderMiscOptionsStr.append( tagValue.m_tag);
+                       orderMiscOptionsStr.append( "=");
+                       orderMiscOptionsStr.append( tagValue.m_value);
+                       orderMiscOptionsStr.append( ";");
+                   }
+               }
+               send( orderMiscOptionsStr.toString());
+           }
+           
         }
         catch( Exception e) {
             error( id, EClientErrors.FAIL_SEND_ORDER, "" + e);
@@ -2247,7 +2411,185 @@ public class EClientSocket {
             error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_CANACCOUNTDATA, "" + e);
         }
     }
+	
+	public synchronized void verifyRequest( String apiName, String apiVersion) {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return;
+        }
 
+        if (m_serverVersion < MIN_SERVER_VER_LINKING) {
+            error(EClientErrors.NO_VALID_ID, EClientErrors.UPDATE_TWS,
+            "  It does not support verification request.");
+            return;
+        }
+
+        if (!m_extraAuth) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_VERIFYMESSAGE,
+            "  Intent to authenticate needs to be expressed during initial connect request.");
+            return;
+        	
+        }
+
+        final int VERSION = 1;
+
+        Builder b = new Builder();
+        b.send( VERIFY_REQUEST);
+        b.send( VERSION);
+        b.send( apiName);
+        b.send( apiVersion);
+
+        try {
+            m_dos.write( b.getBytes() );
+        }
+        catch (IOException e) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_VERIFYREQUEST, "" + e);
+        }
+    }
+
+	public synchronized void verifyMessage( String apiData) {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return;
+        }
+
+        if (m_serverVersion < MIN_SERVER_VER_LINKING) {
+            error(EClientErrors.NO_VALID_ID, EClientErrors.UPDATE_TWS,
+            "  It does not support verification message sending.");
+            return;
+        }
+
+        final int VERSION = 1;
+
+        Builder b = new Builder();
+        b.send( VERIFY_MESSAGE);
+        b.send( VERSION);
+        b.send( apiData);
+
+        try {
+            m_dos.write( b.getBytes() );
+        }
+        catch (IOException e) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_VERIFYMESSAGE, "" + e);
+        }
+    }
+
+	public synchronized void queryDisplayGroups( int reqId) {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return;
+        }
+
+        if (m_serverVersion < MIN_SERVER_VER_LINKING) {
+            error(EClientErrors.NO_VALID_ID, EClientErrors.UPDATE_TWS,
+            "  It does not support queryDisplayGroups request.");
+            return;
+        }
+
+        final int VERSION = 1;
+
+        Builder b = new Builder();
+        b.send( QUERY_DISPLAY_GROUPS);
+        b.send( VERSION);
+        b.send( reqId);
+
+        try {
+            m_dos.write( b.getBytes() );
+        }
+        catch (IOException e) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_QUERYDISPLAYGROUPS, "" + e);
+        }
+    }
+	
+	public synchronized void subscribeToGroupEvents( int reqId, int groupId) {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return;
+        }
+
+        if (m_serverVersion < MIN_SERVER_VER_LINKING) {
+            error(EClientErrors.NO_VALID_ID, EClientErrors.UPDATE_TWS,
+            "  It does not support subscribeToGroupEvents request.");
+            return;
+        }
+
+        final int VERSION = 1;
+
+        Builder b = new Builder();
+        b.send( SUBSCRIBE_TO_GROUP_EVENTS);
+        b.send( VERSION);
+        b.send( reqId);
+        b.send( groupId);
+
+        try {
+            m_dos.write( b.getBytes() );
+        }
+        catch (IOException e) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_SUBSCRIBETOGROUPEVENTS, "" + e);
+        }
+    }	
+
+	public synchronized void updateDisplayGroup( int reqId, String contractInfo) {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return;
+        }
+
+        if (m_serverVersion < MIN_SERVER_VER_LINKING) {
+            error(EClientErrors.NO_VALID_ID, EClientErrors.UPDATE_TWS,
+            "  It does not support updateDisplayGroup request.");
+            return;
+        }
+
+        final int VERSION = 1;
+
+        Builder b = new Builder();
+        b.send( UPDATE_DISPLAY_GROUP);
+        b.send( VERSION);
+        b.send( reqId);
+        b.send( contractInfo);
+
+        try {
+            m_dos.write( b.getBytes() );
+        }
+        catch (IOException e) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_UPDATEDISPLAYGROUP, "" + e);
+        }
+    }	
+
+	public synchronized void unsubscribeFromGroupEvents( int reqId) {
+        // not connected?
+        if( !m_connected) {
+            notConnected();
+            return;
+        }
+
+        if (m_serverVersion < MIN_SERVER_VER_LINKING) {
+            error(EClientErrors.NO_VALID_ID, EClientErrors.UPDATE_TWS,
+            "  It does not support unsubscribeFromGroupEvents request.");
+            return;
+        }
+
+        final int VERSION = 1;
+
+        Builder b = new Builder();
+        b.send( UNSUBSCRIBE_FROM_GROUP_EVENTS);
+        b.send( VERSION);
+        b.send( reqId);
+
+        try {
+            m_dos.write( b.getBytes() );
+        }
+        catch (IOException e) {
+            error( EClientErrors.NO_VALID_ID, EClientErrors.FAIL_SEND_UNSUBSCRIBEFROMGROUPEVENTS, "" + e);
+        }
+    }	
+	
     /** @deprecated, never called. */
     protected synchronized void error( String err) {
         m_anyWrapper.error( err);

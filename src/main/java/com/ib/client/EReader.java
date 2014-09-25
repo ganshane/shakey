@@ -49,6 +49,10 @@ public class EReader extends Thread {
     static final int POSITION_END = 62;
     static final int ACCOUNT_SUMMARY = 63;
     static final int ACCOUNT_SUMMARY_END = 64;
+    static final int VERIFY_MESSAGE_API = 65;
+    static final int VERIFY_COMPLETED = 66;
+    static final int DISPLAY_GROUP_LIST = 67;
+    static final int DISPLAY_GROUP_UPDATED = 68;
 
     private EClientSocket 	m_parent;
     private DataInputStream m_dis;
@@ -1115,6 +1119,43 @@ public class EReader extends Thread {
                 commissionReport.m_yieldRedemptionDate = readInt();
 
                 eWrapper().commissionReport( commissionReport);
+                break;
+            }
+            case VERIFY_MESSAGE_API: {
+                /*int version =*/ readInt();
+                String apiData = readStr();
+
+                eWrapper().verifyMessageAPI(apiData);
+                break;
+            }
+            case VERIFY_COMPLETED: {
+                /*int version =*/ readInt();
+                String isSuccessfulStr = readStr();
+                boolean isSuccessful = "true".equals(isSuccessfulStr);
+                String errorText = readStr();
+
+
+                if (isSuccessful) {
+                    m_parent.startAPI();
+                }
+
+                eWrapper().verifyCompleted(isSuccessful, errorText);
+                break;
+            }
+            case DISPLAY_GROUP_LIST: {
+                /*int version =*/ readInt();
+                int reqId = readInt();
+                String groups = readStr();
+
+                eWrapper().displayGroupList(reqId, groups);
+                break;
+            }
+            case DISPLAY_GROUP_UPDATED: {
+                /*int version =*/ readInt();
+                int reqId = readInt();
+                String contractInfo = readStr();
+
+                eWrapper().displayGroupUpdated(reqId, contractInfo);
                 break;
             }
 

@@ -57,5 +57,9 @@ public interface EWrapper extends AnyWrapper {
     void positionEnd();
     void accountSummary(int reqId, String account, String tag, String value, String currency);
     void accountSummaryEnd(int reqId);
+    void verifyMessageAPI( String apiData);
+    void verifyCompleted( boolean isSuccessful, String errorText);
+    void displayGroupList( int reqId, String groups);
+    void displayGroupUpdated( int reqId, String contractInfo);
 }
 

@@ -4,10 +4,12 @@
 package com.ib.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
@@ -18,6 +20,7 @@ import com.ib.client.ExecutionFilter;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
 import com.ib.client.ScannerSubscription;
+import com.ib.client.TagValue;
 import com.ib.client.UnderComp;
 import com.ib.controller.ApiConnection.ILogger;
 import com.ib.controller.Types.BarSize;
@@ -282,7 +285,7 @@ public class ApiController implements EWrapper {
 	}
 
 	public void cancelPositions( IPositionHandler handler) {
-		m_positionHandlers.add( handler);
+		m_positionHandlers.remove( handler);
 		m_client.cancelPositions();
 		sendEOM();
 	}
@@ -398,7 +401,7 @@ public class ApiController implements EWrapper {
     public void reqTopMktData(NewContract contract, String genericTickList, boolean snapshot, ITopMktDataHandler handler) {
     	int reqId = m_reqId++;
     	m_topMktDataMap.put( reqId, handler);
-    	m_client.reqMktData( reqId, contract.getContract(), genericTickList, snapshot);
+    	m_client.reqMktData( reqId, contract.getContract(), genericTickList, snapshot, Collections.<TagValue>emptyList() );
 		sendEOM();
     }
 
@@ -406,7 +409,7 @@ public class ApiController implements EWrapper {
     	int reqId = m_reqId++;
     	m_topMktDataMap.put( reqId, handler);
     	m_optionCompMap.put( reqId, handler);
-    	m_client.reqMktData( reqId, contract.getContract(), genericTickList, snapshot);
+    	m_client.reqMktData( reqId, contract.getContract(), genericTickList, snapshot, Collections.<TagValue>emptyList() );
 		sendEOM();
     }
 
@@ -414,7 +417,7 @@ public class ApiController implements EWrapper {
     	int reqId = m_reqId++;
     	m_topMktDataMap.put( reqId, handler);
     	m_efpMap.put( reqId, handler);
-    	m_client.reqMktData( reqId, contract.getContract(), genericTickList, snapshot);
+    	m_client.reqMktData( reqId, contract.getContract(), genericTickList, snapshot, Collections.<TagValue>emptyList() );
 		sendEOM();
     }
 
@@ -509,7 +512,8 @@ public class ApiController implements EWrapper {
     public void reqDeepMktData( NewContract contract, int numRows, IDeepMktDataHandler handler) {
     	int reqId = m_reqId++;
     	m_deepMktDataMap.put( reqId, handler);
-    	m_client.reqMktDepth( reqId, contract.getContract(), numRows);
+    	Vector<TagValue> mktDepthOptions = new Vector<TagValue>();
+    	m_client.reqMktDepth( reqId, contract.getContract(), numRows, mktDepthOptions);
 		sendEOM();
     }
 
@@ -660,8 +664,11 @@ public class ApiController implements EWrapper {
 	}
 
 	// ---------------------------------------- Trading and Option Exercise ----------------------------------------
+	/** This interface is for receiving events for a specific order placed from the API.
+	 *  Compare to ILiveOrderHandler. */
 	public interface IOrderHandler {
 		void orderState(NewOrderState orderState);
+		void orderStatus(OrderStatus status, int filled, int remaining, double avgFillPrice, long permId, int parentId, double lastFillPrice, int clientId, String whyHeld);
 		void handle(int errorCode, String errorMsg);
 	}
 
@@ -699,6 +706,8 @@ public class ApiController implements EWrapper {
 
 
 	// ---------------------------------------- Live order handling ----------------------------------------
+	/** This interface is for downloading and receiving events for all live orders.
+	 *  Compare to IOrderHandler. */
 	public interface ILiveOrderHandler {
 		void openOrder(NewContract contract, NewOrder order, NewOrderState orderState);
 		void openOrderEnd();
@@ -752,8 +761,13 @@ public class ApiController implements EWrapper {
 	}
 
 	@Override public void orderStatus(int orderId, String status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
-		for (ILiveOrderHandler handler : m_liveOrderHandlers) {
-			handler.orderStatus(orderId, OrderStatus.valueOf( status), filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
+		IOrderHandler handler = m_orderHandlers.get( orderId);
+		if (handler != null) {
+			handler.orderStatus( OrderStatus.valueOf( status), filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
+		}
+
+		for (ILiveOrderHandler liveOrderHandler : m_liveOrderHandlers) {
+			liveOrderHandler.orderStatus(orderId, OrderStatus.valueOf( status), filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
 		}
 		recEOM();
 	}
@@ -775,7 +789,8 @@ public class ApiController implements EWrapper {
 	public void reqScannerSubscription( ScannerSubscription sub, IScannerHandler handler) {
 		int reqId = m_reqId++;
 		m_scannerMap.put( reqId, handler);
-		m_client.reqScannerSubscription( reqId, sub);
+		Vector<TagValue> scannerSubscriptionOptions = new Vector<TagValue>();
+		m_client.reqScannerSubscription( reqId, sub, scannerSubscriptionOptions);
 		sendEOM();
 	}
 
@@ -821,7 +836,7 @@ public class ApiController implements EWrapper {
     	int reqId = m_reqId++;
     	m_historicalDataMap.put( reqId, handler);
     	String durationStr = duration + " " + durationUnit.toString().charAt( 0);
-    	m_client.reqHistoricalData(reqId, contract.getContract(), endDateTime, durationStr, barSize.toString(), whatToShow.toString(), rthOnly ? 1 : 0, 2);
+    	m_client.reqHistoricalData(reqId, contract.getContract(), endDateTime, durationStr, barSize.toString(), whatToShow.toString(), rthOnly ? 1 : 0, 2, Collections.<TagValue>emptyList() );
 		sendEOM();
     }
 
@@ -866,7 +881,8 @@ public class ApiController implements EWrapper {
     public void reqRealTimeBars(NewContract contract, WhatToShow whatToShow, boolean rthOnly, IRealTimeBarHandler handler) {
     	int reqId = m_reqId++;
     	m_realTimeBarMap.put( reqId, handler);
-    	m_client.reqRealTimeBars(reqId, contract.getContract(), 0, whatToShow.toString(), rthOnly);
+    	Vector<TagValue> realTimeBarsOptions = new Vector<TagValue>();
+    	m_client.reqRealTimeBars(reqId, contract.getContract(), 0, whatToShow.toString(), rthOnly, realTimeBarsOptions);
 		sendEOM();
     }
 
@@ -896,7 +912,7 @@ public class ApiController implements EWrapper {
     public void reqFundamentals( NewContract contract, FundamentalType reportType, IFundamentalsHandler handler) {
     	int reqId = m_reqId++;
     	m_fundMap.put( reqId, handler);
-    	m_client.reqFundamentalData( reqId, contract.getContract(), reportType.getApiString() );
+    	m_client.reqFundamentalData( reqId, contract.getContract(), reportType.getApiString());
 		sendEOM();
     }
 
@@ -946,6 +962,10 @@ public class ApiController implements EWrapper {
 		recEOM();
 	}
 
+	@Override public void verifyMessageAPI( String apiData) {}
+	@Override public void verifyCompleted( boolean isSuccessful, String errorText) {}
+	@Override public void displayGroupList(int reqId, String groups) {}
+	@Override public void displayGroupUpdated(int reqId, String contractInfo) {}
 
 	// ---------------------------------------- other methods ----------------------------------------
 	/** Not supported in ApiController. */

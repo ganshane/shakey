@@ -24,6 +24,7 @@ public class ContractPanel extends JPanel {
 	protected TCombo<Right> m_right = new TCombo<Right>( Right.values() );
 	protected UpperField m_multiplier = new UpperField();
 	protected UpperField m_exchange = new UpperField();
+	protected UpperField m_compExch = new UpperField();
 	protected UpperField m_currency = new UpperField();
 	protected UpperField m_localSymbol = new UpperField();
 	protected UpperField m_tradingClass = new UpperField();
@@ -36,7 +37,8 @@ public class ContractPanel extends JPanel {
 		if (c.secType() == SecType.None) {
 			m_symbol.setText( "IBM");
 			m_secType.setSelectedItem( SecType.STK);
-			m_exchange.setText( "SMART"); 
+			m_exchange.setText( "SMART");
+			m_compExch.setText( "ISLAND");
 			m_currency.setText( "USD");
 		}
 		else {
@@ -46,7 +48,8 @@ public class ContractPanel extends JPanel {
 			m_strike.setText( "" + m_contract.strike() );
 			m_right.setSelectedItem( m_contract.right() ); 
 			m_multiplier.setText( m_contract.multiplier() );
-			m_exchange.setText( m_contract.exchange()); 
+			m_exchange.setText( m_contract.exchange());
+			m_compExch.setText( m_contract.primaryExch() );
 			m_currency.setText( m_contract.currency());
 			m_localSymbol.setText( m_contract.localSymbol());
 			m_tradingClass.setText( m_contract.tradingClass() );
@@ -60,6 +63,7 @@ public class ContractPanel extends JPanel {
     	p.add( "Put/call", m_right);
     	p.add( "Multiplier", m_multiplier);
     	p.add( "Exchange", m_exchange);
+    	p.add( "Comp. Exch.", m_compExch);
     	p.add( "Currency", m_currency);
     	p.add( "Local symbol", m_localSymbol);
     	p.add( "Trading class", m_tradingClass);
@@ -77,13 +81,18 @@ public class ContractPanel extends JPanel {
 			return;
 		}
 		
+		// component exchange is only relevant if exchange is SMART or BEST
+		String exch = m_exchange.getText().toUpperCase(); 
+		String compExch = exch.equals( "SMART") || exch.equals( "BEST") ? m_compExch.getText().toUpperCase() : null; 		
+		
 		m_contract.symbol( m_symbol.getText().toUpperCase() ); 
 		m_contract.secType( m_secType.getSelectedItem() ); 
 		m_contract.expiry( m_expiry.getText() ); 
 		m_contract.strike( m_strike.getDouble() ); 
 		m_contract.right( m_right.getSelectedItem() ); 
 		m_contract.multiplier( m_multiplier.getText() ); 
-		m_contract.exchange( m_exchange.getText().toUpperCase() ); 
+		m_contract.exchange( exch);
+		m_contract.primaryExch( compExch);
 		m_contract.currency( m_currency.getText().toUpperCase() ); 
 		m_contract.localSymbol( m_localSymbol.getText().toUpperCase() );
 		m_contract.tradingClass( m_tradingClass.getText().toUpperCase() );

@@ -33,6 +33,7 @@ import com.ib.controller.ApiController.IOrderHandler;
 import com.ib.controller.NewContract;
 import com.ib.controller.NewOrder;
 import com.ib.controller.NewOrderState;
+import com.ib.controller.OrderStatus;
 import com.ib.controller.OrderType;
 import com.ib.controller.Types.Action;
 import com.ib.controller.Types.AlgoParam;
@@ -153,6 +154,8 @@ public class TicketDlg extends JDialog {
 					}
 				});
 			}
+			@Override public void orderStatus(OrderStatus status, int filled, int remaining, double avgFillPrice, long permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+			}
 			@Override public void handle(int errorCode, final String errorMsg) {
 				m_order.orderId( 0);
 				SwingUtilities.invokeLater( new Runnable() {
@@ -182,6 +185,8 @@ public class TicketDlg extends JDialog {
 						JOptionPane.showMessageDialog( TicketDlg.this, errorMsg);
 					}
 				});
+			}
+			@Override public void orderStatus(OrderStatus status, int filled, int remaining, double avgFillPrice, long permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
 			}
 		});
 		
