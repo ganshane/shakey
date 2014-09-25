@@ -17,7 +17,7 @@ object ShakeyClient extends LoggerSupport{
   }
   class ApiLogger(val prefix:String) extends ApiConnection.ILogger{
     def log(str: String): Unit = {
-      logger.debug(prefix+":{}",str)
+      //logger.debug(prefix+":{}",str)
     }
   }
   class ShakeyConnectionHandler extends IConnectionHandler{
