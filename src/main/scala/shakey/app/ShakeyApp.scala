@@ -27,7 +27,7 @@ object ShakeyApp
     )
     startUpContainer(classes: _*)
     printText("shakey",
-      "META-INF/maven/com.ganshane/shakey/version.properties",logger);
+      "META-INF/maven/com.ganshane/shakey/version.properties", logger);
     logger.info("shakey server started")
     join()
   }
