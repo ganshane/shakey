@@ -34,12 +34,12 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
     perodicExecutor.addJob(new CronSchedule("0 * * * * ? *"),"job",new Runnable {
       override def run(): Unit = {
         database updateStockList {stock=>
-          logger.debug("{} 1m: {}", stock.symbol, (stock.meter.getOneMinuteRate * 60).asInstanceOf[Int])
-          logger.debug("{} 5m: {}", stock.symbol, (stock.meter.getFiveMinuteRate * 5 * 60).asInstanceOf[Int])
-          logger.debug("{} 15m: {}", stock.symbol, (stock.meter.getFifteenMinuteRate * 15 * 60).asInstanceOf[Int])
-          //TODO 大于多少倍算天量？,算法支撑
+        //logger.debug("{} 1m: {}", stock.symbol, (stock.meter.getOneMinuteRate * 60).asInstanceOf[Int])
+        //logger.debug("{} 5m: {}", stock.symbol, (stock.meter.getFiveMinuteRate * 5 * 60).asInstanceOf[Int])
+        //logger.debug("{} 15m: {}", stock.symbol, (stock.meter.getFifteenMinuteRate * 15 * 60).asInstanceOf[Int])
+        //TODO 大于多少倍算天量？,算法支撑
           if (stock.rateOneSec > 0 && stock.rateOneSec * config.rateOverflow < stock.meter.getFiveMinuteRate) {
-            logger.error("=====================> {}",stock.symbol)
+            logger.error("=====================> {} rate:" + stock.rateOneSec * 60 * 5 + " now:" + stock.meter.getFiveMinuteRate * 5 * 60, stock.symbol)
             notifier.notify(stock)
           }
         }
