@@ -41,7 +41,7 @@ object RestClient {
       val response: CloseableHttpResponse = httpClient.execute(get)
       try {
         if (response.getStatusLine.getStatusCode == 200) {
-          return Source.fromInputStream(response.getEntity.getContent,encoding).mkString
+          return Source.fromInputStream(response.getEntity.getContent, "GBK").mkString
         }
         else throw new RuntimeException(response.getStatusLine.toString)
       }
