@@ -8,6 +8,7 @@ import shakey.services.{Stock, StockDatabase, LoggerSupport}
 import org.apache.tapestry5.ioc.services.cron.{CronSchedule, PeriodicExecutor}
 import org.apache.tapestry5.json.JSONArray
 import shakey.ShakeyConstants
+import shakey.config.ShakeyConfig
 
 /**
  * 实时股票信息的抓取
@@ -15,7 +16,8 @@ import shakey.ShakeyConstants
  * 2> 启动ib的实时数据抓取 TODO 考虑放入另外的线程专门处理数据
  * 3> 启动报表 TODO 考虑启动线程进行比较控制
  */
-class RealtimeMktDataFetcher(controller:ApiController,
+class RealtimeMktDataFetcher(config: ShakeyConfig,
+                             controller: ApiController,
                              perodicExecutor:PeriodicExecutor,
                              database:StockDatabase) extends LoggerSupport{
   private val TRADE_SECONDS_IN_ONE_DAY:Double = 6.5 * 60 * 60
@@ -36,7 +38,7 @@ class RealtimeMktDataFetcher(controller:ApiController,
           logger.debug("{} 5m: {}",stock.symbol,(stock.meter.getFiveMinuteRate * 5 * 60 * 100).asInstanceOf[Int])
           logger.debug("{} 15m: {}",stock.symbol,(stock.meter.getFifteenMinuteRate * 15 * 60 * 100).asInstanceOf[Int])
           //TODO 大于多少倍算天量？,算法支撑
-          if(stock.rateOneSec > 0 && stock.rateOneSec * 1.5 < stock.meter.getFiveMinuteRate){
+          if (stock.rateOneSec > 0 && stock.rateOneSec * config.rateOverflow < stock.meter.getFiveMinuteRate) {
             logger.error("=====================> {}",stock.symbol)
           }
         }

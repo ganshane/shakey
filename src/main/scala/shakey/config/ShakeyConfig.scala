@@ -17,4 +17,7 @@ class ShakeyConfig {
   var ibApiHost:String = _
   @XmlElement(name="ib_api_port")
   var ibApiPort:Int = _
+
+  @XmlElement(name = "rate_overflow")
+  var rateOverflow: Double = 1.618
 }
