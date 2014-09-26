@@ -40,6 +40,7 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
           //TODO 大于多少倍算天量？,算法支撑
           if (stock.rateOneSec > 0 && stock.rateOneSec * config.rateOverflow < stock.meter.getFiveMinuteRate) {
             logger.error("=====================> {}",stock.symbol)
+            MessageNotifier.notify(stock)
           }
         }
       }
