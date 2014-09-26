@@ -5,7 +5,6 @@ import org.apache.http.impl.client.{HttpClientBuilder, CloseableHttpClient}
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.{HttpGet, CloseableHttpResponse}
 import shakey.ShakeyConstants
-import java.util
 import org.apache.http.client.utils.URIBuilder
 import scala.io.Source
 
