@@ -7,7 +7,8 @@ import com.ib.controller.ApiController.IRealTimeBarHandler
 import shakey.services.LoggerSupport
 import com.codahale.metrics.Meter
 import org.apache.tapestry5.ioc.services.cron.{CronSchedule, PeriodicExecutor}
-import org.joda.time.DateTime
+import org.apache.tapestry5.json.JSONArray
+import shakey.ShakeyConstants
 
 /**
  * Created by jcai on 14-9-25.
@@ -16,6 +17,8 @@ class RealtimeMktDataFetcher(controller:ApiController,perodicExecutor:PeriodicEx
   @PostInjection
   def start{
     logger.debug("fetch realtime data...")
+    fetchStockRate("yy")
+    /*
     startStock("YY")
     startStock("JD")
     startStock("BABA")
@@ -25,6 +28,23 @@ class RealtimeMktDataFetcher(controller:ApiController,perodicExecutor:PeriodicEx
     startStock("JMEI")
     startStock("WUBA")
     startStock("TOUR")
+    */
+  }
+  def fetchStockRate(stock:String){
+    val content = RestClient.get(ShakeyConstants.HISTORY_API_URL_FORMATTER.format(stock))
+    val jsonArray = new JSONArray(content)
+    val len = jsonArray.length()
+    var size = ShakeyConstants.HISTORY_SIZE
+    var begin = len - size
+    if(begin <0)
+      begin = 0
+    size = len - begin
+    var volCount = 0
+    begin until jsonArray.length() foreach{case i=>
+      val obj = jsonArray.getJSONObject(i)
+      volCount += obj.getInt("v")
+    }
+    logger.debug("rate:{}",volCount/size)
   }
   def startStock(stock:String){
     val m_contract= new NewContract();
@@ -32,24 +52,6 @@ class RealtimeMktDataFetcher(controller:ApiController,perodicExecutor:PeriodicEx
     m_contract.secType(SecType.STK)
     m_contract.currency("USD")
     m_contract.exchange("SMART")
-
-    //查询5‘分钟的速率
-    /*
-    //http://stock.finance.sina.com.cn/usstock/api/json.php/US_MinKService.getDailyK?symbol=baba&___qn=3
-    val dateTime = new DateTime().minusDays(1).formatted("YYYYMMDD HH:MM:SS")
-    controller.reqHistoricalData(m_contract,dateTime,1,Types.DurationUnit.MONTH,Types.BarSize._1_day,Types.WhatToShow.TRADES,false,new ApiController.IHistoricalDataHandler(){
-      private var count = 0L;
-      private var dayCount = 0;
-      override def historicalData(bar: Bar, hasGaps: Boolean): Unit = {
-        count += bar.volume()
-        dayCount += 1
-      }
-      override def historicalDataEnd(): Unit = {
-        logger.debug("stock {} average:{}",stock,count/dayCount)
-      }
-    })
-    */
-
     val meter = new Meter()
     perodicExecutor.addJob(new CronSchedule("0 * * * * ? *"),"job",new Runnable {
       override def run(): Unit = {

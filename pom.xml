@@ -17,6 +17,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.tapestry</groupId>
+      <artifactId>tapestry-json</artifactId>
+      <version>${tapestry-release-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tapestry</groupId>
       <artifactId>tapestry-ioc</artifactId>
       <version>${tapestry-release-version}</version>
       <exclusions>
@@ -50,6 +55,12 @@
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
       <version>${metrics-release-version}</version>
+    </dependency>
+    <!-- httpclient -->
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.3.5</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
