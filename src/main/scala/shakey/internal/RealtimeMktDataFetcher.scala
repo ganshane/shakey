@@ -27,9 +27,8 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
     logger.debug("fetch realtime data...")
     //初始化速率
     database updateStockList fetchStockRate
-    database updateStockList startMonitor
-
     startReporter
+    database updateStockList startMonitor
   }
   def startReporter{
     perodicExecutor.addJob(new CronSchedule("0 * * * * ? *"),"job",new Runnable {
