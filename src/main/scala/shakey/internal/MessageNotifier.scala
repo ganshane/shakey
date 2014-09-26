@@ -10,20 +10,33 @@ import shakey.services.Stock
 class MessageNotifier(name: String) extends JFrame(name) {
   setSize(200, 200);
   setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-  setVisible(true);
+  setVisible(false);
   val codebase = getClass.getResource("/ding.wav")
   val ding = Applet.newAudioClip(codebase);
-  ding.play()
-  this.dispose()
+
+  def play {
+    ding.play()
+  }
 }
 
 object MessageNotifier {
+  private var INSTANCE: MessageNotifier = null
+
   def notify(stock: Stock) {
-    SwingUtilities.invokeLater(new Runnable {
-      override def run(): Unit = {
-        new MessageNotifier(stock.symbol)
-      }
-    })
+    if (INSTANCE == null) {
+      SwingUtilities.invokeLater(new Runnable {
+        override def run(): Unit = {
+          INSTANCE = new MessageNotifier(stock.symbol)
+          INSTANCE.play
+        }
+      })
+    } else {
+      SwingUtilities.invokeLater(new Runnable {
+        override def run(): Unit = {
+          INSTANCE.play
+        }
+      })
+    }
   }
 
   def main(args: Array[String]) {
