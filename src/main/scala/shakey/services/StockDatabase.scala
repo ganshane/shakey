@@ -1,5 +1,7 @@
 package shakey.services
 
+import com.codahale.metrics.Meter
+
 /**
  * Created by jcai on 14-9-26.
  */
@@ -13,5 +15,6 @@ class Stock{
     this.symbol = s;
   }
   var symbol:String = _ //代码
-  var averageVol:Double = _ //平均的量
+  var rateOneSec:Double = _ //平均的量
+  val meter:Meter = new Meter()
 }

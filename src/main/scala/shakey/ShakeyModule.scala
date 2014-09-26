@@ -5,9 +5,9 @@ import scala.io.Source
 import org.apache.tapestry5.ioc.annotations.{Contribute,Symbol}
 import org.apache.tapestry5.ioc.services.{FactoryDefaults, SymbolProvider}
 import org.apache.tapestry5.ioc.{ServiceBinder, MappedConfiguration}
-import shakey.internal.{RealtimeMktDataFetcher, XmlLoader}
+import shakey.internal.{MemoryStockDatabase, RealtimeMktDataFetcher, XmlLoader}
 import com.ib.controller.ApiController
-import shakey.services.ShakeyClient
+import shakey.services.{StockDatabase, ShakeyClient}
 
 /**
  * Created by jcai on 14-9-25.
@@ -15,6 +15,7 @@ import shakey.services.ShakeyClient
 object ShakeyModule {
   def bind(binder:ServiceBinder){
     binder.bind(classOf[RealtimeMktDataFetcher]).eagerLoad()
+    binder.bind(classOf[StockDatabase],classOf[MemoryStockDatabase])
   }
   def buildApiController(config:ShakeyConfig):ApiController={
     ShakeyClient.start(config)
