@@ -64,7 +64,13 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
     logger.debug("symbol:{} rate:{}",stock.symbol,rate)
     stock.rateOneSec = rate;
   }
+
+  private var countMonitor = 0
+
   def startMonitor(stock:Stock){
+    Thread.sleep(11 * 1000)
+    countMonitor += 1
+    logger.debug("monitor:{} symbol:{}", countMonitor, stock.symbol)
     val contract= new NewContract();
     contract.symbol(stock.symbol);
     contract.secType(SecType.STK)
