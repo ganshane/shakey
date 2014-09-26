@@ -3,6 +3,7 @@ package shakey.internal
 import javax.swing.{SwingUtilities, JFrame}
 import java.applet.Applet
 import shakey.services.Stock
+import org.apache.tapestry5.ioc.annotations.PostInjection
 
 /**
  * 消息通知
@@ -19,28 +20,25 @@ class MessageNotifier(name: String) extends JFrame(name) {
   }
 }
 
-object MessageNotifier {
+class MessageNotifierService {
   private var INSTANCE: MessageNotifier = null
 
-  def notify(stock: Stock) {
-    if (INSTANCE == null) {
-      SwingUtilities.invokeLater(new Runnable {
-        override def run(): Unit = {
-          INSTANCE = new MessageNotifier(stock.symbol)
-          INSTANCE.play
-        }
-      })
-    } else {
-      SwingUtilities.invokeLater(new Runnable {
-        override def run(): Unit = {
-          INSTANCE.play
-        }
-      })
-    }
+  @PostInjection
+  def start {
+    SwingUtilities.invokeAndWait(new Runnable {
+      override def run(): Unit = {
+        INSTANCE = new MessageNotifier("jcai")
+        INSTANCE.play
+      }
+    })
   }
 
-  def main(args: Array[String]) {
-    val stock = new Stock("YY")
-    notify(stock)
+  def notify(stock: Stock) {
+    SwingUtilities.invokeLater(new Runnable {
+      override def run(): Unit = {
+        INSTANCE.play
+      }
+    })
   }
 }
+

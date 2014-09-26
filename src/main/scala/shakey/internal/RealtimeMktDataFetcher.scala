@@ -19,7 +19,8 @@ import shakey.config.ShakeyConfig
 class RealtimeMktDataFetcher(config: ShakeyConfig,
                              controller: ApiController,
                              perodicExecutor:PeriodicExecutor,
-                             database:StockDatabase) extends LoggerSupport{
+                             database: StockDatabase,
+                             notifier: MessageNotifierService) extends LoggerSupport {
   private val TRADE_SECONDS_IN_ONE_DAY:Double = 6.5 * 60 * 60
   @PostInjection
   def start{
@@ -40,7 +41,7 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
           //TODO 大于多少倍算天量？,算法支撑
           if (stock.rateOneSec > 0 && stock.rateOneSec * config.rateOverflow < stock.meter.getFiveMinuteRate) {
             logger.error("=====================> {}",stock.symbol)
-            MessageNotifier.notify(stock)
+            notifier.notify(stock)
           }
         }
       }
