@@ -9,7 +9,7 @@ import org.apache.http.client.utils.URIBuilder
 import scala.io.Source
 
 /**
- * Created by jcai on 14-9-26.
+ * rest 客户端，请求SINA的API
  */
 object RestClient {
   def close(e: Closeable) {

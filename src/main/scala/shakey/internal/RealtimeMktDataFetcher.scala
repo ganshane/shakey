@@ -5,13 +5,15 @@ import org.apache.tapestry5.ioc.annotations.PostInjection
 import com.ib.controller.Types.SecType
 import com.ib.controller.ApiController.IRealTimeBarHandler
 import shakey.services.{Stock, StockDatabase, LoggerSupport}
-import com.codahale.metrics.Meter
 import org.apache.tapestry5.ioc.services.cron.{CronSchedule, PeriodicExecutor}
 import org.apache.tapestry5.json.JSONArray
 import shakey.ShakeyConstants
 
 /**
- * Created by jcai on 14-9-25.
+ * 实时股票信息的抓取
+ * 1> 先从sina抓取均量 TODO 考虑放入另外线程处理
+ * 2> 启动ib的实时数据抓取 TODO 考虑放入另外的线程专门处理数据
+ * 3> 启动报表 TODO 考虑启动线程进行比较控制
  */
 class RealtimeMktDataFetcher(controller:ApiController,
                              perodicExecutor:PeriodicExecutor,
