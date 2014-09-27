@@ -18,7 +18,9 @@ Section ""
   StrCpy $0 '"$R0" -Dserver.home="$EXEDIR\.." -classpath "${CLASSPATH}" ${CLASS}'
  
   SetOutPath $EXEDIR
-  Exec $0
+  ExecWait $0
+  ;MessageBox MB_OK|MB_ICONINFORMATION "Final cmdline: $0"
+
 SectionEnd
  
 Function GetJRE
