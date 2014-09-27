@@ -44,6 +44,7 @@ class MessageNotifier(name: String) extends LoggerSupport {
   private val image: Image = iconToImage(new BevelArrowIcon(BevelArrowIcon.UP, false, false))
   private val image2: Image = iconToImage(new BevelArrowIcon(BevelArrowIcon.DOWN, false, false))
   private var timer: Timer = _
+  private val tray = SystemTray.getSystemTray
   @volatile
   private var runFlag = false
 
@@ -77,6 +78,7 @@ class MessageNotifier(name: String) extends LoggerSupport {
 
     val exitListener = new ActionListener() {
       override def actionPerformed(e: ActionEvent): Unit = {
+        tray.remove(trayIcon)
         logger.debug("exiting ...")
         ShakeyApp.stopServer()
         System.exit(0);
@@ -110,7 +112,6 @@ class MessageNotifier(name: String) extends LoggerSupport {
     trayIcon.setImageAutoSize(true);
     trayIcon.addMouseListener(mouseListener);
 
-    val tray = SystemTray.getSystemTray
     tray.add(trayIcon);
 
     start
