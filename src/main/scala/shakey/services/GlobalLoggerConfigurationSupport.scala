@@ -34,9 +34,7 @@ trait GlobalLoggerConfigurationSupport {
       properties.put("log4j.appender.R.File", logFile)
       properties.put("log4j.appender.R.MaxFileSize", "10000KB")
       properties.put("log4j.appender.R.MaxBackupIndex", "10")
-      properties.put("log4j.category.nirvana", "info")
-      properties.put("log4j.category.egfit", "info")
-      properties.put("log4j.category.egf", "info")
+      properties.put("log4j.category.shakey", "info")
       properties.put("log4j.category.org.apache.zookeeper", "warn")
       properties.put("log4j.category.com.netflix", "warn")
 

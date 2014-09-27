@@ -9,6 +9,7 @@ import org.apache.tapestry5.ioc.services.cron.{CronSchedule, PeriodicExecutor}
 import org.apache.tapestry5.json.JSONArray
 import shakey.ShakeyConstants
 import shakey.config.ShakeyConfig
+import java.util.concurrent.Executors
 
 /**
  * 实时股票信息的抓取
@@ -22,13 +23,19 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
                              database: StockDatabase,
                              notifier: MessageNotifierService) extends LoggerSupport {
   private val TRADE_SECONDS_IN_ONE_DAY:Double = 6.5 * 60 * 60
+  private val executor = Executors.newFixedThreadPool(2)
+
   @PostInjection
   def start{
     logger.debug("fetch realtime data...")
     //初始化速率
-    database updateStockList fetchStockRate
+    executor.submit(new Runnable {
+      override def run(): Unit = {
+        database updateStockList fetchStockRate
+        database updateStockList startMonitor
+      }
+    })
     startReporter
-    database updateStockList startMonitor
   }
   def startReporter{
     perodicExecutor.addJob(new CronSchedule("0 * * * * ? *"),"job",new Runnable {
