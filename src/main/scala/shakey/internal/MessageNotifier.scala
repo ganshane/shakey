@@ -9,10 +9,32 @@ import java.awt.event._
 import java.awt.image.BufferedImage
 import shakey.app.ShakeyApp
 import java.awt.TrayIcon.MessageType
+import java.util.concurrent.PriorityBlockingQueue
+import shakey.internal.MessageNotifier.StockWithTime
+import org.joda.time.DateTime
 
 /**
  * 消息通知
  */
+object MessageNotifier {
+  val queue = new PriorityBlockingQueue[StockWithTime](15)
+
+  class StockWithTime(val stock: Stock, val time: Long) extends Comparable[StockWithTime] {
+    override def compareTo(o: StockWithTime): Int = {
+      o.time.compareTo(time)
+    }
+
+    override def equals(obj: scala.Any): Boolean = {
+      obj.asInstanceOf[StockWithTime].stock.symbol == stock.symbol
+    }
+
+    override def toString: String = {
+      new DateTime(time).toString("HH:mm") + " " + stock.symbol
+    }
+  }
+
+}
+
 class MessageNotifier(name: String) extends LoggerSupport {
   private val codebase = getClass.getResource("/ding.wav")
   private val ding = Applet.newAudioClip(codebase);
@@ -32,15 +54,23 @@ class MessageNotifier(name: String) extends LoggerSupport {
     runFlag = true
   }
 
+  private def showStockInfo {
+    //TODO 打开一个panel能够展示提醒的股票信息
+    val builder = new StringBuilder
+    val it = MessageNotifier.queue.iterator()
+    while (it.hasNext) {
+      builder.append(it.next()).append("\n")
+    }
+    trayIcon.displayMessage("Shakey", builder.toString(), MessageType.INFO)
+    runFlag = false
+  }
+
   def initTray {
     val mouseListener = new MouseAdapter() {
       override def mouseClicked(e: MouseEvent): Unit = {
         //双击图标不再闪动
         if (e.getClickCount == 2) {
-          //TODO 打开一个panel能够展示提醒的股票信息
-          runFlag = false
-
-          trayIcon.displayMessage("Shakey", "will display stock information", MessageType.INFO)
+          showStockInfo
         }
       }
     };
@@ -57,9 +87,17 @@ class MessageNotifier(name: String) extends LoggerSupport {
         trayIcon.displayMessage("Shakey", "powered by you and me!", MessageType.INFO)
       }
     }
+    val showListener = new ActionListener {
+      override def actionPerformed(e: ActionEvent): Unit = {
+        showStockInfo
+      }
+    }
 
     val popup = new PopupMenu();
 
+    val showItem = new MenuItem("Show");
+    showItem.addActionListener(showListener);
+    popup.add(showItem);
     val aboutItem = new MenuItem("About");
     aboutItem.addActionListener(aboutListener);
     popup.add(aboutItem);
@@ -280,6 +318,19 @@ class MessageNotifierService {
   }
 
   def notify(stock: Stock) {
+    val stockWithTime = new StockWithTime(stock, System.currentTimeMillis())
+    MessageNotifier.queue.remove(stockWithTime)
+
+    val queue = MessageNotifier.queue
+    val size = queue.size() - 10
+    if (size >= 0) {
+      0 until size foreach {
+        case i =>
+          queue.poll()
+      }
+    }
+    queue.offer(stockWithTime)
+
     SwingUtilities.invokeLater(new Runnable {
       override def run(): Unit = {
         INSTANCE.play
