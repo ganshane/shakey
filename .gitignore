@@ -18,3 +18,4 @@ build/
 .idea
 *xcode/
 support/config/*.xml
+support/nsis/*.exe
