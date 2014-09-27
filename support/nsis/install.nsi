@@ -42,6 +42,8 @@ InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 BrandingText "Shakey Stock Scanner(${PRODUCT_VERSION}) "
+RequestExecutionLevel admin
+
 
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
