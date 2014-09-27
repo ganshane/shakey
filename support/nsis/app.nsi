@@ -1,6 +1,6 @@
 Name "Shakey Stock Scanner"
 Caption "Shakey"
-;Icon "Java Launcher.ico"
+Icon "shakey.ico"
 OutFile "shakey.exe"
  
 SilentInstall silent

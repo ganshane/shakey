@@ -57,7 +57,7 @@ Section "MainSection" SEC01
   CreateShortCut "$DESKTOP\shakey.lnk" "$INSTDIR\bin\shakey.exe"
 
   SetOutPath "$INSTDIR\bin"
-  File "../bin/shakey.exe"
+  File "shakey.exe"
 
   SetOutPath "$INSTDIR\doc"
   File /r "../doc/*"
