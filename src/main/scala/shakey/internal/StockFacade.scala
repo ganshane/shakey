@@ -16,19 +16,19 @@ class StockFacade(periodicExecutor: PeriodicExecutor,
   private val executor = Executors.newFixedThreadPool(1)
 
   @PostInjection
-  def start {
+  def start() {
     executor.submit(new Runnable {
       override def run(): Unit = {
         //启动历史数据的速率查询
-        historicalDataFetcher.startFetchBiggerVolume
+        historicalDataFetcher.startFetchBiggerVolume()
         //实时数据的监控
-        realtimeMktDataFetcher.startMonitor
+        realtimeMktDataFetcher.startMonitor()
       }
     })
-    startReporter
+    startReporter()
   }
 
-  def startReporter {
+  def startReporter() {
     periodicExecutor.addJob(new CronSchedule("0 * * * * ? *"), "job", new Runnable {
       override def run(): Unit = {
         database updateStockList {

@@ -16,7 +16,7 @@ class RealtimeMktDataFetcher(controller: ApiController,
 
   private var countMonitor = 0
 
-  def startMonitor {
+  def startMonitor() {
     database updateStockList monitor
   }
 
