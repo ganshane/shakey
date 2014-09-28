@@ -6,12 +6,19 @@ import com.ib.controller.Types.SecType
 import com.ib.controller.ApiController.IHistoricalDataHandler
 import java.util.{Comparator, PriorityQueue}
 import org.joda.time.DateTime
+import shakey.ShakeyConstants
+import org.apache.tapestry5.json.JSONArray
+import shakey.config.ShakeyConfig
 
 /**
  * 历史数据的抓取
  */
-class HistoricalDataFetcher(controller: ApiController, localStore: LocalSimpleStore, database: StockDatabase) {
+class HistoricalDataFetcher(config: ShakeyConfig,
+                            controller: ApiController,
+                            localStore: LocalSimpleStore,
+                            database: StockDatabase) extends LoggerSupport {
   private val last_fetch_historic_data = "last_fetch_historic_data"
+  private val TRADE_SECONDS_IN_ONE_DAY: Double = 6.5 * 60 * 60
 
   def startFetchBiggerVolume() {
     val timeOpt = localStore.get[Long](last_fetch_historic_data)
@@ -27,17 +34,37 @@ class HistoricalDataFetcher(controller: ApiController, localStore: LocalSimpleSt
               case Some(rate) =>
                 stock.rateOneSec = rate
               case None =>
-                fetchHistoricalData(stock)
+                fetchStockRateBy5MinuteHistoricalData(stock)
             }
         }
         return
       }
     }
-    database updateStockList fetchHistoricalData
+    database updateStockList fetchStockRateBy5MinuteHistoricalData
     localStore.put(last_fetch_historic_data, DateTime.now.getMillis)
   }
 
-  def fetchHistoricalData(stock: Stock) {
+  def fetchStockRateByDayVolume(stock: Stock) {
+    val content = RestClient.get(ShakeyConstants.HISTORY_API_URL_FORMATTER.format(stock.symbol))
+    val jsonArray = new JSONArray(content)
+    val len = jsonArray.length()
+    var size = ShakeyConstants.HISTORY_SIZE
+    var begin = len - size
+    if (begin < 0)
+      begin = 0
+    size = len - begin
+    var volCount = 0
+    begin until jsonArray.length() foreach {
+      case i =>
+        val obj = jsonArray.getJSONObject(i)
+        volCount += obj.getInt("v")
+    }
+    val rate: Double = (volCount / 1.0 / size / TRADE_SECONDS_IN_ONE_DAY / 100) * config.rateOverflow
+    logger.debug("symbol:{} rate:{}", stock.symbol, rate)
+    stock.rateOneSec = rate;
+  }
+
+  def fetchStockRateBy5MinuteHistoricalData(stock: Stock) {
     Thread.sleep(11 * 1000)
     val contract = new NewContract();
     contract.symbol(stock.symbol);
@@ -52,7 +79,7 @@ class HistoricalDataFetcher(controller: ApiController, localStore: LocalSimpleSt
 
   }
 
-  class ShakeyHistoricalDataHandler(stock: Stock) extends IHistoricalDataHandler with LoggerSupport {
+  class ShakeyHistoricalDataHandler(stock: Stock) extends IHistoricalDataHandler {
     private val rate = 0.2
     private val size = (6.5 * 12 * 5 * rate).asInstanceOf[Int]
     private val queue = new PriorityQueue[Bar](size, new Comparator[Bar] {
