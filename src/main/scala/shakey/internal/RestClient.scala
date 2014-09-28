@@ -24,7 +24,7 @@ object RestClient {
 
   def createHttpClient: CloseableHttpClient = {
     val defaultConfig: RequestConfig = RequestConfig.custom.setConnectTimeout(10 * 1000).setSocketTimeout(30 * 1000).build
-    return HttpClientBuilder.create.setDefaultRequestConfig(defaultConfig).setUserAgent("nirvana/1.0").build
+    return HttpClientBuilder.create.setDefaultRequestConfig(defaultConfig).setUserAgent("shakey/1.0").build
   }
 
   def get(url:String,params:Option[Map[String,String]]=None,headers:Option[Map[String,String]]=None,encoding:String=ShakeyConstants.UTF8_ENCODING):String={

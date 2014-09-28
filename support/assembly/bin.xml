@@ -61,7 +61,6 @@
               <include>javassist-*</include>
               <include>javax.inject-*</include>
               <include>log4j-*</include>
-              <include>nirvana-*</include>
               <include>plastic-*</include>
               <include>scala-library-*</include>
               <include>slf4j-api-*</include>

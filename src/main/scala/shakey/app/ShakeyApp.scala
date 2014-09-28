@@ -7,7 +7,7 @@ import shakey.services.{BootstrapTextSupport, GlobalLoggerConfigurationSupport, 
 import shakey.{ShakeyConstants, ShakeyModule}
 
 /**
- * nirvana sync application
+ * shakey application
  */
 object ShakeyApp
   extends TapestryIocContainerSupport

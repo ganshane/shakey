@@ -53,10 +53,10 @@ class ShakeyException(message:String,cause:Throwable,val errorCode:ErrorCode) ex
   override def toString={
     val sb  = new StringBuilder
     if(errorCode != null){
-      sb.append("nirvana-").append(errorCode.code).append(":")
+      sb.append("shakey-").append(errorCode.code).append(":")
       sb.append(errorCode.toString).append(" ")
     }else{
-      sb.append("nirvana-0000 UNKNOWN ")
+      sb.append("shakey-0000 UNKNOWN ")
     }
     if(message != null){sb.append(message)}
     if(cause!=null){sb.append(" -> ").append(cause)}
