@@ -1,7 +1,7 @@
 package shakey.internal
 
 import scala.slick.driver.H2Driver.simple._
-import scala.slick.lifted.{ProvenShape, Column, Tag}
+import scala.slick.lifted.ProvenShape
 
 class Stocks(tag: Tag)
 extends Table[(String, Double, Long)](tag, "STOCKS") {
@@ -11,6 +11,6 @@ extends Table[(String, Double, Long)](tag, "STOCKS") {
 
   def time: Column[Long] = column[Long]("last_time")
 
-  def * : ProvenShape[(Int, Double, Long)] =
+  def * : ProvenShape[(String, Double, Long)] =
     (symbol, ratePerSec, time)
 }

@@ -4,6 +4,7 @@ import org.apache.tapestry5.json.{JSONArray, JSONObject}
 import shakey.services.LoggerSupport
 import scala.collection.mutable.ArrayBuffer
 import util.control.Breaks._
+import org.joda.time.DateTime
 
 
 /**
@@ -34,8 +35,14 @@ object StockSymbolFetcher extends LoggerSupport {
 
   private val cn_stock_formatter = "http://money.finance.sina.com.cn/q/api/jsonp_v2.php/x/US_ChinaStockService.getData?page=%s&num=60&sort=volume&asc=0&market=&concept=0";
 
-  def fetchChinaStock = {
+  def fetchChinaStock: Array[String] = {
     val buffer = new ArrayBuffer[String]()
+    val dateTime = DateTime.now
+    //只允许在非交易时间进行数据抓取
+    if (dateTime.getHourOfDay > 21 || dateTime.getHourOfDay < 4) {
+      logger.error("unable to fetch stock from sina,because time is invalid!")
+      return buffer.toArray
+    }
     var count = 0
     breakable {
       1 to 4 foreach {
