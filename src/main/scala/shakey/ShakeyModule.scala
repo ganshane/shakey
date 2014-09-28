@@ -20,6 +20,7 @@ object ShakeyModule {
     binder.bind(classOf[RealtimeMktDataFetcher]).eagerLoad()
     binder.bind(classOf[StockDatabase],classOf[MemoryStockDatabase])
     binder.bind(classOf[MessageNotifierService]).eagerLoad()
+    binder.bind(classOf[HistoricalDataFetcher])
   }
   def buildApiController(config:ShakeyConfig):ApiController={
     ShakeyClient.start(config)

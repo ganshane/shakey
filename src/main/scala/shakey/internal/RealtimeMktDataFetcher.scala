@@ -20,6 +20,7 @@ import java.util.concurrent.Executors
 class RealtimeMktDataFetcher(config: ShakeyConfig,
                              controller: ApiController,
                              perodicExecutor:PeriodicExecutor,
+                             historicalDataFetcher: HistoricalDataFetcher,
                              database: StockDatabase,
                              notifier: MessageNotifierService) extends LoggerSupport {
   private val TRADE_SECONDS_IN_ONE_DAY:Double = 6.5 * 60 * 60
@@ -31,7 +32,7 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
     //初始化速率
     executor.submit(new Runnable {
       override def run(): Unit = {
-        database updateStockList fetchStockRate
+        historicalDataFetcher.startFetchBiggerVolume();
         database updateStockList startMonitor
       }
     })
