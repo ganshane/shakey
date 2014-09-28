@@ -2,13 +2,14 @@ package shakey.internal
 
 import shakey.services.{Stock, StockDatabase, LoggerSupport}
 import java.util.concurrent.ConcurrentHashMap
+import shakey.config.ShakeyConfig
 
 /**
  * Created by jcai on 14-9-26.
  */
-class MemoryStockDatabase extends StockDatabase with LoggerSupport {
+class MemoryStockDatabase(config: ShakeyConfig) extends StockDatabase with LoggerSupport {
   private val db = new ConcurrentHashMap[String, Stock]()
-  StockSymbolFetcher.fetchChinaStock.foreach(x => db.put(x, new Stock(x)))
+  config.stocks.split(",").foreach(x => db.put(x, new Stock(x)))
 
   override def findStockBySymbol(symbol: String): Option[Stock] = {
     val value = db.get(symbol)

@@ -13,7 +13,8 @@ object StockSymbolFetcher extends LoggerSupport {
   private val url_formatter = "http://stock.finance.sina.com.cn/usstock/api/jsonp.php/x/US_CategoryService.getList?page=%s&num=60&sort=price&asc=0&market=&id="
 
   def main(args: Array[String]) {
-    fetchChinaStock
+    val stocks = fetchChinaStock.mkString(",")
+    println(stocks)
   }
 
   def fetchAllStock {

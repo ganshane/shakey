@@ -27,6 +27,11 @@
           <xs:documentation>配置IB API的端口</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element type="xs:string" name="stocks" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>监控的股票</xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element type="xs:double" name="rate_overflow" minOccurs="0" maxOccurs="1" default="1.618">
         <xs:annotation>
           <xs:documentation>配置算作天量的比例</xs:documentation>

@@ -20,4 +20,6 @@ class ShakeyConfig {
 
   @XmlElement(name = "rate_overflow")
   var rateOverflow: Double = 1.618
+  @XmlElement(name = "stocks")
+  var stocks: String = _
 }
