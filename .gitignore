@@ -19,3 +19,4 @@ build/
 *xcode/
 support/config/*.xml
 support/nsis/*.exe
+support/data
