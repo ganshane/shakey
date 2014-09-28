@@ -17,10 +17,11 @@ import java.io.File
  */
 object ShakeyModule {
   def bind(binder:ServiceBinder){
-    binder.bind(classOf[RealtimeMktDataFetcher]).eagerLoad()
+    binder.bind(classOf[RealtimeMktDataFetcher])
     binder.bind(classOf[StockDatabase],classOf[MemoryStockDatabase])
     binder.bind(classOf[MessageNotifierService]).eagerLoad()
     binder.bind(classOf[HistoricalDataFetcher])
+    binder.bind(classOf[StockFacade]).eagerLoad()
   }
   def buildApiController(config:ShakeyConfig):ApiController={
     ShakeyClient.start(config)

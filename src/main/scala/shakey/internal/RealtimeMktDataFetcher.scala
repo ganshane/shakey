@@ -1,13 +1,9 @@
 package shakey.internal
 
 import com.ib.controller.{Bar, Types, NewContract, ApiController}
-import org.apache.tapestry5.ioc.annotations.PostInjection
 import com.ib.controller.Types.SecType
 import com.ib.controller.ApiController.IRealTimeBarHandler
 import shakey.services.{Stock, StockDatabase, LoggerSupport}
-import org.apache.tapestry5.ioc.services.cron.{CronSchedule, PeriodicExecutor}
-import shakey.config.ShakeyConfig
-import java.util.concurrent.Executors
 
 /**
  * 实时股票信息的抓取
@@ -15,46 +11,16 @@ import java.util.concurrent.Executors
  * 2> 启动ib的实时数据抓取 TODO 考虑放入另外的线程专门处理数据
  * 3> 启动报表 TODO 考虑启动线程进行比较控制
  */
-class RealtimeMktDataFetcher(config: ShakeyConfig,
-                             controller: ApiController,
-                             perodicExecutor:PeriodicExecutor,
-                             historicalDataFetcher: HistoricalDataFetcher,
-                             database: StockDatabase,
-                             notifier: MessageNotifierService) extends LoggerSupport {
-  private val executor = Executors.newFixedThreadPool(2)
-
-  @PostInjection
-  def start{
-    logger.debug("fetch realtime data...")
-    //初始化速率
-    executor.submit(new Runnable {
-      override def run(): Unit = {
-        historicalDataFetcher.startFetchBiggerVolume();
-        database updateStockList startMonitor
-      }
-    })
-    startReporter
-  }
-  def startReporter{
-    perodicExecutor.addJob(new CronSchedule("0 * * * * ? *"),"job",new Runnable {
-      override def run(): Unit = {
-        database updateStockList {stock=>
-        //logger.debug("{} 1m: {}", stock.symbol, (stock.meter.getOneMinuteRate * 60).asInstanceOf[Int])
-        //logger.debug("{} 5m: {}", stock.symbol, (stock.meter.getFiveMinuteRate * 5 * 60).asInstanceOf[Int])
-        //logger.debug("{} 15m: {}", stock.symbol, (stock.meter.getFifteenMinuteRate * 15 * 60).asInstanceOf[Int])
-        //TODO 大于多少倍算天量？,算法支撑
-          if (stock.rateOneSec > 0 && stock.rateOneSec < stock.meter.getFiveMinuteRate) {
-            logger.error("=====================> {} rate:" + stock.rateOneSec * 60 * 5 + " now:" + stock.meter.getFiveMinuteRate * 5 * 60, stock.symbol)
-            notifier.notify(stock)
-          }
-        }
-      }
-    })
-  }
+class RealtimeMktDataFetcher(controller: ApiController,
+                             database: StockDatabase) extends LoggerSupport {
 
   private var countMonitor = 0
 
-  def startMonitor(stock:Stock){
+  def startMonitor {
+    database updateStockList monitor
+  }
+
+  private def monitor(stock: Stock) {
     Thread.sleep(11 * 1000)
     countMonitor += 1
     logger.debug("monitor:{} symbol:{}", countMonitor, stock.symbol)
@@ -65,7 +31,8 @@ class RealtimeMktDataFetcher(config: ShakeyConfig,
     contract.exchange("SMART")
     controller.reqRealTimeBars(contract,Types.WhatToShow.TRADES,false,new ShakeyRealTimeBarHandler(stock))
   }
-  class ShakeyRealTimeBarHandler(stock:Stock) extends IRealTimeBarHandler{
+
+  private class ShakeyRealTimeBarHandler(stock: Stock) extends IRealTimeBarHandler {
     override def realtimeBar(bar: Bar): Unit = {
       //logger.debug("bar time:{} vol:{}",bar.formattedTime(),bar.volume())
       stock.meter.mark(bar.volume()) //IB API每次返回的单位是100

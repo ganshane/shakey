@@ -21,30 +21,39 @@ class HistoricalDataFetcher(config: ShakeyConfig,
   private val TRADE_SECONDS_IN_ONE_DAY: Double = 6.5 * 60 * 60
 
   def startFetchBiggerVolume() {
+    //从本地存储中抓取最后一次历史数据抓取时间
     val timeOpt = localStore.get[Long](last_fetch_historic_data)
-    if (timeOpt.isDefined) {
-      val nowDay = DateTime.now().getDayOfYear
-      val lastDay = new DateTime(timeOpt.get).getDayOfYear
-      if (lastDay + 2 >= nowDay) {
-        //从数据库获取
-        database updateStockList {
-          case stock =>
-            val rateOpt = localStore.get[Double](stock.symbol)
-            rateOpt match {
-              case Some(rate) =>
-                stock.rateOneSec = rate
-              case None =>
-                fetchStockRateBy5MinuteHistoricalData(stock)
-            }
+    timeOpt match {
+      case Some(time) =>
+        val nowDay = DateTime.now().getDayOfYear
+        val lastDay = new DateTime(timeOpt.get).getDayOfYear
+        if (lastDay + 2 >= nowDay) {
+          //数据在2天内已经有更新
+          //从数据库获取
+          database updateStockList {
+            case stock =>
+              val rateOpt = localStore.get[Double](stock.symbol)
+              rateOpt match {
+                case Some(rate) =>
+                  stock.rateOneSec = rate
+                case None =>
+                  fetchStockRateBy5MinuteHistoricalData(stock)
+              }
+          }
+        } else {
+          fetchAllStockData
         }
-        return
-      }
+      case None =>
+        fetchAllStockData
     }
+  }
+
+  private def fetchAllStockData {
     database updateStockList fetchStockRateBy5MinuteHistoricalData
     localStore.put(last_fetch_historic_data, DateTime.now.getMillis)
   }
 
-  def fetchStockRateByDayVolume(stock: Stock) {
+  private def fetchStockRateByDayVolume(stock: Stock) {
     val content = RestClient.get(ShakeyConstants.HISTORY_API_URL_FORMATTER.format(stock.symbol))
     val jsonArray = new JSONArray(content)
     val len = jsonArray.length()
@@ -64,7 +73,7 @@ class HistoricalDataFetcher(config: ShakeyConfig,
     stock.rateOneSec = rate;
   }
 
-  def fetchStockRateBy5MinuteHistoricalData(stock: Stock) {
+  private def fetchStockRateBy5MinuteHistoricalData(stock: Stock) {
     Thread.sleep(11 * 1000)
     val contract = new NewContract();
     contract.symbol(stock.symbol);
@@ -79,7 +88,7 @@ class HistoricalDataFetcher(config: ShakeyConfig,
 
   }
 
-  class ShakeyHistoricalDataHandler(stock: Stock) extends IHistoricalDataHandler {
+  private class ShakeyHistoricalDataHandler(stock: Stock) extends IHistoricalDataHandler {
     private val rate = 0.2
     private val size = (6.5 * 12 * 5 * rate).asInstanceOf[Int]
     private val queue = new PriorityQueue[Bar](size, new Comparator[Bar] {
