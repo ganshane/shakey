@@ -32,11 +32,27 @@
           <xs:documentation>监控的股票</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element type="VolumeStrategy" name="volume_strategy" minOccurs="1" maxOccurs="1" default="FiveMinute">
+        <xs:annotation>
+          <xs:documentation>天量计算策略</xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element type="xs:double" name="rate_overflow" minOccurs="0" maxOccurs="1" default="1.618">
         <xs:annotation>
           <xs:documentation>配置算作天量的比例</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element type="xs:double" name="top_percent" minOccurs="0" maxOccurs="1" default="0.2">
+        <xs:annotation>
+          <xs:documentation>取topN的比率</xs:documentation>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
+  <xs:simpleType name="VolumeStrategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FiveMinute"/>
+      <xs:enumeration value="Day"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>

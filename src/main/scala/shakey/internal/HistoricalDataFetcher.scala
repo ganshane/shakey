@@ -8,7 +8,7 @@ import java.util.{Comparator, PriorityQueue}
 import org.joda.time.DateTime
 import shakey.ShakeyConstants
 import org.apache.tapestry5.json.JSONArray
-import shakey.config.ShakeyConfig
+import shakey.config.{VolumeStrategy, ShakeyConfig}
 
 /**
  * 历史数据的抓取
@@ -37,7 +37,7 @@ class HistoricalDataFetcher(config: ShakeyConfig,
                 case Some(rate) =>
                   stock.rateOneSec = rate
                 case None =>
-                  fetchStockRateBy5MinuteHistoricalData(stock)
+                  fetchStockRateByStrategy(stock)
               }
           }
         } else {
@@ -49,8 +49,18 @@ class HistoricalDataFetcher(config: ShakeyConfig,
   }
 
   private def fetchAllStockData {
-    database updateStockList fetchStockRateBy5MinuteHistoricalData
+    database updateStockList fetchStockRateByStrategy
     localStore.put(last_fetch_historic_data, DateTime.now.getMillis)
+  }
+
+  private def fetchStockRateByStrategy(stock: Stock) {
+    config.volumeStrategy match {
+      //根据配置的策略来抓取天量
+      case VolumeStrategy.FiveMinute =>
+        fetchStockRateBy5MinuteHistoricalData(stock)
+      case VolumeStrategy.Day =>
+        fetchStockRateByDayVolume(stock)
+    }
   }
 
   private def fetchStockRateByDayVolume(stock: Stock) {
@@ -89,23 +99,24 @@ class HistoricalDataFetcher(config: ShakeyConfig,
   }
 
   private class ShakeyHistoricalDataHandler(stock: Stock) extends IHistoricalDataHandler {
-    private val rate = 0.2
+    private val rate = config.topPercent
     private val size = (6.5 * 12 * 5 * rate).asInstanceOf[Int]
+    //利用优先队列，只保存前N个
     private val queue = new PriorityQueue[Bar](size, new Comparator[Bar] {
       override def compare(o1: Bar, o2: Bar): Int = {
         o2.volume() compare (o1.volume())
       }
     })
-    private var allSize = 0
+    private var count = 0
     logger.info("fetch historical data for {}", stock.symbol)
 
     override def historicalData(bar: Bar, hasGaps: Boolean): Unit = {
-      allSize += 1
+      count += 1
       queue.add(bar)
     }
 
     override def historicalDataEnd(): Unit = {
-      var size = (allSize * rate).asInstanceOf[Int]
+      var size = (count * rate).asInstanceOf[Int]
 
       var bar: Bar = null
 

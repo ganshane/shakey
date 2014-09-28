@@ -18,8 +18,13 @@ class ShakeyConfig {
   @XmlElement(name="ib_api_port")
   var ibApiPort:Int = _
 
-  @XmlElement(name = "rate_overflow")
-  var rateOverflow: Double = 1.618
   @XmlElement(name = "stocks")
   var stocks: String = _
+  @XmlElement(name = "volume_strategy")
+  var volumeStrategy: VolumeStrategy = VolumeStrategy.FiveMinute //Day
+
+  @XmlElement(name = "rate_overflow")
+  var rateOverflow: Double = 1.618
+  @XmlElement(name = "top_percent")
+  var topPercent: Double = 0.2
 }
