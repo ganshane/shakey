@@ -3,14 +3,13 @@ package shakey
 import scala.slick.driver.H2Driver.simple._
 import shakey.config.ShakeyConfig
 import scala.io.Source
-import org.apache.tapestry5.ioc.annotations.{EagerLoad, Contribute, Symbol}
+import org.apache.tapestry5.ioc.annotations.{Contribute,Symbol}
 import org.apache.tapestry5.ioc.services.{FactoryDefaults, SymbolProvider}
 import org.apache.tapestry5.ioc.{ServiceBinder, MappedConfiguration}
 import shakey.internal._
 import com.ib.controller.ApiController
 import shakey.services.{StockDatabase, ShakeyClient}
 import scala.Some
-import java.io.File
 
 /**
  * Created by jcai on 14-9-25.
@@ -18,18 +17,22 @@ import java.io.File
 object ShakeyModule {
   def bind(binder:ServiceBinder){
     binder.bind(classOf[RealtimeMktDataFetcher]).eagerLoad()
-    binder.bind(classOf[StockDatabase], classOf[H2StockDatabase])
+    binder.bind(classOf[StockDatabase],classOf[MemoryStockDatabase])
     binder.bind(classOf[MessageNotifierService]).eagerLoad()
   }
   def buildApiController(config:ShakeyConfig):ApiController={
     ShakeyClient.start(config)
   }
 
-  @EagerLoad
   def buildDatabase(@Symbol(ShakeyConstants.SERVER_HOME) serverHome: String): Database = {
     val stocks: TableQuery[Stocks] = TableQuery[Stocks]
-    val dbPath = new File(serverHome + "/data/shakey").getAbsolutePath
-    val db = Database.forURL("jdbc:h2:file:" + dbPath, driver = "org.h2.Driver")
+    val db = Database.forURL("jdbc:h2:mem:hello", driver = "org.h2.Driver")
+    //创建表结构
+    db.withSession {
+      implicit session =>
+        stocks.ddl.createStatements
+    }
+   
     db
   }
 
