@@ -1,8 +1,8 @@
 language: java
 before_script:
-- apt-get install makensis
+  - sudo apt-get install makensis
 script:
-- sh support/scripts/package.sh
+  - sh support/scripts/package.sh
 deploy:
   provider: releases
   api_key:
