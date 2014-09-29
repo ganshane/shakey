@@ -55,7 +55,7 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
     setSize(370, 215)
     setLocationRelativeTo(null)
     setVisible(true)
-    this.toFront()
+    setAlwaysOnTop(true)
   }
 
   def incCountAndMessage(message: String) {
