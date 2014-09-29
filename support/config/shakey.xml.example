@@ -14,5 +14,5 @@
   <!--
   在5分钟计算的时候，取topN的比率
   -->
-  <top_percent>0.2</top_percent>
+  <top_percent>0.1618</top_percent>
 </shakey>

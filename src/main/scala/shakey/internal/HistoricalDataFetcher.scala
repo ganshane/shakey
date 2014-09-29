@@ -53,7 +53,7 @@ class HistoricalDataFetcher(config: ShakeyConfig,
   private def fetchAllStockData {
     database updateStockList {
       case stock =>
-        screen.incCountAndMessage("正在抓取股票" + stock.symbol + "的天量值")
+        screen.incCountAndMessage("正在抓取股票%s的天量值 ....".format(stock.symbol))
         fetchStockRateByStrategy(stock)
     }
     localStore.put(last_fetch_historic_data, DateTime.now.getMillis)
@@ -133,6 +133,7 @@ class HistoricalDataFetcher(config: ShakeyConfig,
       if (bar != null) {
         stock.rateOneSec = bar.volume() / (5.0 * 60)
         localStore.put(stock.symbol, stock.rateOneSec)
+        screen.setErrorMessage("%s的天量值是:%s".format(stock.symbol, bar.volume() * 100))
       }
       logger.info("finish fetch historical data,symbol:" + stock.symbol + " vol:{} rate:{}", bar.volume(), stock.rateOneSec)
     }
