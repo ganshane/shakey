@@ -1,3 +1,14 @@
 language: java
+before_script:
+- apt-get install makensis
 script:
-  - mvn -P production clean package
+- sh support/scripts/package.sh
+deploy:
+  provider: releases
+  api_key:
+    secure: DHeO/Ppb3YvwW40WnseQJ+Q1Ut5ba6hXsA7ZJiLXXN/Uj0kZ1K8f3bW2gL9MGCNmpDoaIebrLxqiyMtBomO0fU+WpdIzr+l7Sy8ZijkuP8pCMWDxD6kL0izGtYYX+JI9WgeXNblq/h82ciMYXIa50GkiWbT81KuVkyWc4S7qt1U=
+  file: support/nsis/ShakeySetup.exe
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
