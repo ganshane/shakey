@@ -5,7 +5,7 @@
   <ib_api_host>localhost</ib_api_host>
   <ib_api_port>7496</ib_api_port>
   <!-- 监控股票列表 -->
-  <stocks>BABA,TSM,MPEL,HIMX,SFUN,TSL,JKS,JRJC,JD,BIDU,QIHU,CSIQ,NQ,HPJ,VIMC,YOKU,JASO,CTRP,EDU,VNET,EJ,DANG,CMCM,CHL,VIPS,BITA,KNDI,WUBA,ATHM,SINA,YY,GAME,WB,JMEI,LEJU,QUNR,ASX,XRS,CMGE,SIMO,SPIL,TOUR,MOBI,LITB,TEDU,WX,WBAI,CHU,NTES,HOLI,XNET,GOMO,NOAH,CXDC,PWRD,FENG</stocks>
+  <stocks>BABA,SFUN,TSL,JD,BIDU,QIHU,YY</stocks>
   <!-- 天量获取的策略,有两种方式
   FiveMinute  从IB实时抓取5分钟数据进行计算
   Day   从sina抓取每天的数据进行计算
