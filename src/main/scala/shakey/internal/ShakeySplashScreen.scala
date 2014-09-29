@@ -61,6 +61,7 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
   def incCountAndMessage(message: String) {
     this.count += 1
     this.message = message;
+    this.errorMessage = null;
   }
 
   def setErrorMessage(message: String) {
@@ -72,8 +73,7 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
       def actionPerformed(evt: ActionEvent) {
         progressBar.setValue(count)
         messageLabel.setText(message)
-        if (errorMessage != null)
-          messageLabel2.setText(errorMessage)
+        messageLabel2.setText(errorMessage)
 
         if (count == total) {
           if (notifier != null)
