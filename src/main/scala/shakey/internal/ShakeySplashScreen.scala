@@ -27,17 +27,17 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
     container.add(panel)
 
     var label: JLabel = new JLabel("天量报警工具")
-    label.setFont(new Font("Verdana", Font.BOLD, 16))
+    label.setFont(new Font("Song", Font.BOLD, 16))
     label.setBounds(125, 25, 280, 30)
     panel.add(label)
 
     label = new JLabel("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;感谢 心灵捕手、华美、<br/> &lt;&lt;美股技术讨论群&gt;&gt;的兄弟姐妹们！</html>")
-    label.setFont(new Font("Verdana", Font.BOLD, 12))
+    label.setFont(new Font("Song", Font.PLAIN, 12))
     label.setBounds(60, 55, 280, 60)
     panel.add(label)
 
     messageLabel = new JLabel("loading ...")
-    messageLabel.setFont(new Font("Verdana", Font.BOLD, 10))
+    messageLabel.setFont(new Font("Song", Font.PLAIN, 10))
     messageLabel.setBounds(11, 105, 340, 30)
     panel.add(messageLabel)
 
@@ -49,6 +49,7 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
     setSize(370, 215)
     setLocationRelativeTo(null)
     setVisible(true)
+    this.toFront()
   }
 
   def incCountAndMessage(message: String) {
