@@ -16,6 +16,7 @@ import shakey.config.{VolumeStrategy, ShakeyConfig}
 class HistoricalDataFetcher(config: ShakeyConfig,
                             controller: ApiController,
                             localStore: LocalSimpleStore,
+                            screen: ShakeySplashScreen,
                             database: StockDatabase) extends LoggerSupport {
   private val last_fetch_historic_data = "last_fetch_historic_data"
   private val TRADE_SECONDS_IN_ONE_DAY: Double = 6.5 * 60 * 60
@@ -32,6 +33,7 @@ class HistoricalDataFetcher(config: ShakeyConfig,
           //从数据库获取
           database updateStockList {
             case stock =>
+              screen.incCountAndMessage("正在抓取股票%s的天量值 ....".format(stock.symbol))
               val rateOpt = localStore.get[Double](stock.symbol)
               rateOpt match {
                 case Some(rate) =>
@@ -49,7 +51,11 @@ class HistoricalDataFetcher(config: ShakeyConfig,
   }
 
   private def fetchAllStockData {
-    database updateStockList fetchStockRateByStrategy
+    database updateStockList {
+      case stock =>
+        screen.incCountAndMessage("正在抓取股票" + stock.symbol + "的天量值")
+        fetchStockRateByStrategy(stock)
+    }
     localStore.put(last_fetch_historic_data, DateTime.now.getMillis)
   }
 

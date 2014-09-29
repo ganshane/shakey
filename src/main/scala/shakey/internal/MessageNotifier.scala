@@ -3,7 +3,6 @@ package shakey.internal
 import javax.swing._
 import java.applet.Applet
 import shakey.services.{LoggerSupport, Stock}
-import org.apache.tapestry5.ioc.annotations.PostInjection
 import java.awt._
 import java.awt.event._
 import java.awt.image.BufferedImage
@@ -308,14 +307,17 @@ class MessageNotifier(name: String) extends LoggerSupport {
 class MessageNotifierService {
   private var INSTANCE: MessageNotifier = null
 
-  @PostInjection
   def start {
-    SwingUtilities.invokeAndWait(new Runnable {
+    val runnable = new Runnable {
       override def run(): Unit = {
         INSTANCE = new MessageNotifier("jcai")
-        //INSTANCE.play
       }
-    })
+    }
+    if (SwingUtilities.isEventDispatchThread) {
+      runnable.run()
+    } else {
+      SwingUtilities.invokeAndWait(runnable)
+    }
   }
 
   def notify(stock: Stock) {

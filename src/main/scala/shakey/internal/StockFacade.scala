@@ -13,7 +13,7 @@ class StockFacade(periodicExecutor: PeriodicExecutor,
                   realtimeMktDataFetcher: RealtimeMktDataFetcher,
                   notifier: MessageNotifierService,
                   database: StockDatabase) extends LoggerSupport {
-  private val executor = Executors.newFixedThreadPool(1)
+  private val executor = Executors.newFixedThreadPool(2)
 
   @PostInjection
   def start() {
@@ -25,7 +25,11 @@ class StockFacade(periodicExecutor: PeriodicExecutor,
         realtimeMktDataFetcher.startMonitor()
       }
     })
-    startReporter()
+    executor.submit(new Runnable {
+      override def run(): Unit = {
+        startReporter()
+      }
+    })
   }
 
   def startReporter() {

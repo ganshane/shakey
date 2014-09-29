@@ -12,6 +12,7 @@ import shakey.services.{Stock, StockDatabase, LoggerSupport}
  * 3> 启动报表 TODO 考虑启动线程进行比较控制
  */
 class RealtimeMktDataFetcher(controller: ApiController,
+                             screen: ShakeySplashScreen,
                              database: StockDatabase) extends LoggerSupport {
 
   private var countMonitor = 0
@@ -21,6 +22,7 @@ class RealtimeMktDataFetcher(controller: ApiController,
   }
 
   private def monitor(stock: Stock) {
+    screen.incCountAndMessage("正在准备监控股票%s ......".format(stock.symbol))
     Thread.sleep(11 * 1000)
     countMonitor += 1
     logger.debug("monitor:{} symbol:{}", countMonitor, stock.symbol)

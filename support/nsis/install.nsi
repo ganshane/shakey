@@ -63,12 +63,16 @@ Section "MainSection" SEC01
   File /r "../doc/*"
 
   SetOutPath "$INSTDIR\config"
-  File /r "../config/*"
+  File "../config/shakey.xml.example"
+
   SetOutPath "$INSTDIR\lib"
   File /r "../../target/dependencies/*"
   File "../../target/shakey-1.0-SNAPSHOT.jar"
 
   SetOutPath "$INSTDIR"
+
+  CopyFiles `$INSTDIR\config\shakey.xml.example` `$INSTDIR\config\shakey.xml`
+
 SectionEnd
 
 Section -AdditionalIcons

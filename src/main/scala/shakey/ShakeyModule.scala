@@ -19,9 +19,10 @@ object ShakeyModule {
   def bind(binder:ServiceBinder){
     binder.bind(classOf[RealtimeMktDataFetcher])
     binder.bind(classOf[StockDatabase],classOf[MemoryStockDatabase])
-    binder.bind(classOf[MessageNotifierService]).eagerLoad()
+    binder.bind(classOf[MessageNotifierService])
     binder.bind(classOf[HistoricalDataFetcher])
     binder.bind(classOf[StockFacade]).eagerLoad()
+    binder.bind(classOf[ShakeySplashScreen])
   }
   def buildApiController(config:ShakeyConfig):ApiController={
     ShakeyClient.start(config)
