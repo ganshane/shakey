@@ -7,7 +7,7 @@ import org.apache.tapestry5.ioc.services.{FactoryDefaults, SymbolProvider}
 import org.apache.tapestry5.ioc.{ServiceBinder, MappedConfiguration}
 import shakey.internal._
 import com.ib.controller.ApiController
-import shakey.services.{StockDatabase, ShakeyClient}
+import shakey.services.StockDatabase
 import org.apache.commons.io.FileUtils
 import scala.Some
 import java.io.File
@@ -24,8 +24,9 @@ object ShakeyModule {
     binder.bind(classOf[StockFacade]).eagerLoad()
     binder.bind(classOf[ShakeySplashScreen])
   }
-  def buildApiController(config:ShakeyConfig):ApiController={
-    ShakeyClient.start(config)
+
+  def buildApiController(config: ShakeyConfig, screen: ShakeySplashScreen): ApiController = {
+    ShakeyClient.start(config, screen)
   }
 
   def buildLocalSimpleStore(@Symbol(ShakeyConstants.SERVER_HOME) serverHome: String): LocalSimpleStore = {

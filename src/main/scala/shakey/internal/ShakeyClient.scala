@@ -1,15 +1,16 @@
-package shakey.services
+package shakey.internal
 
 import shakey.config.ShakeyConfig
 import com.ib.controller.ApiController.IConnectionHandler
 import com.ib.controller.{ApiController, ApiConnection}
+import shakey.services.LoggerSupport
 
 /**
  * shakey client
  */
 object ShakeyClient extends LoggerSupport{
-  def start(config:ShakeyConfig):ApiController={
-    val controller = new ApiController(new ShakeyConnectionHandler,
+  def start(config: ShakeyConfig, screen: ShakeySplashScreen): ApiController = {
+    val controller = new ApiController(new ShakeyConnectionHandler(screen),
       new ApiLogger("in"),
       new ApiLogger("out"))
     controller.connect(config.ibApiHost,config.ibApiPort,1024)
@@ -20,7 +21,8 @@ object ShakeyClient extends LoggerSupport{
       //logger.debug(prefix+":{}",str)
     }
   }
-  class ShakeyConnectionHandler extends IConnectionHandler{
+
+  class ShakeyConnectionHandler(screen: ShakeySplashScreen) extends IConnectionHandler {
     def connected(): Unit = {
       logger.info("connected")
     }
@@ -36,6 +38,7 @@ object ShakeyClient extends LoggerSupport{
     }
 
     def message(id: Int, errorCode: Int, errorMsg: String): Unit = {
+      screen.setErrorMessage("code:" + errorCode + new String(errorMsg.getBytes("GBK"), "UTF8"))
       logger.info("ID:"+id+" CODE:{},msg:{}",errorCode,new String(errorMsg.getBytes("GBK"),"UTF8"))
     }
 

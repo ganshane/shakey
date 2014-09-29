@@ -13,9 +13,11 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
   private val progressBar: JProgressBar = new JProgressBar
   private var timer1: Timer = null
   private var messageLabel: JLabel = null
+  private var messageLabel2: JLabel = null
   private var count: Int = 0
   private var total: Int = 0
   private var message: String = "loading ....";
+  private var errorMessage: String = null;
   {
     val container: Container = getContentPane
     container.setLayout(null)
@@ -38,8 +40,12 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
 
     messageLabel = new JLabel("loading ...")
     messageLabel.setFont(new Font("Song", Font.PLAIN, 10))
-    messageLabel.setBounds(11, 105, 340, 30)
+    messageLabel.setBounds(11, 95, 340, 30)
     panel.add(messageLabel)
+    messageLabel2 = new JLabel("")
+    messageLabel2.setFont(new Font("Song", Font.PLAIN, 10))
+    messageLabel2.setBounds(11, 105, 340, 30)
+    panel.add(messageLabel2)
 
     total = config.stocks.split(",").length * 2
     progressBar.setBounds(5, 180, 360, 15)
@@ -57,11 +63,18 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
     this.message = message;
   }
 
+  def setErrorMessage(message: String) {
+    this.errorMessage = message;
+  }
+
   private def loadProgressBar {
     val al: ActionListener = new ActionListener {
       def actionPerformed(evt: ActionEvent) {
         progressBar.setValue(count)
         messageLabel.setText(message)
+        if (errorMessage != null)
+          messageLabel2.setText(errorMessage)
+
         if (count == total) {
           if (notifier != null)
             notifier.start
