@@ -15,7 +15,7 @@ Section ""
   Pop $R0
  
   ; change for your purpose (-jar etc.)
-  StrCpy $0 '"$R0" -Xms256m -Xmx1g -Dserver.home="$EXEDIR\.." -classpath "${CLASSPATH}" ${CLASS}'
+  StrCpy $0 '"$R0" -Xms256m -Xmx1g -Dfile.encoding=utf-8 -Dserver.home="$EXEDIR\.." -classpath "${CLASSPATH}" ${CLASS}'
  
   SetOutPath $EXEDIR
   ExecWait $0

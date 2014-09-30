@@ -1,18 +1,9 @@
 <shakey>
-  <!-- 日志文件存放路径 -->
   <log_file>${server.home}/log/shakey.log</log_file>
   <ib_account>xxx</ib_account>
   <ib_api_host>localhost</ib_api_host>
   <ib_api_port>7496</ib_api_port>
-  <!-- 监控股票列表 -->
   <stocks>BABA,SFUN,TSL,JD,BIDU,QIHU,YY</stocks>
-  <!-- 天量获取的策略,有两种方式
-  FiveMinute  从IB实时抓取5分钟数据进行计算
-  Day   从sina抓取每天的数据进行计算
-  -->
   <volume_strategy>FiveMinute</volume_strategy>
-  <!--
-  在5分钟计算的时候，取topN的比率
-  -->
   <top_percent>0.1618</top_percent>
 </shakey>

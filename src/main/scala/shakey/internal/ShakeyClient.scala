@@ -39,7 +39,7 @@ object ShakeyClient extends LoggerSupport{
 
     def message(id: Int, errorCode: Int, errorMsg: String): Unit = {
       screen.setErrorMessage("code:" + errorCode + new String(errorMsg.getBytes("GBK"), "UTF8"))
-      logger.info("ID:"+id+" CODE:{},msg:{}",errorCode,new String(errorMsg.getBytes("GBK"),"UTF8"))
+      logger.error("ID:"+id+" CODE:{},msg:{}",errorCode,new String(errorMsg.getBytes("GBK"),"UTF8"))
     }
 
     def show(string: String): Unit = {
