@@ -8,7 +8,7 @@ import java.awt.event._
 import java.awt.image.BufferedImage
 import shakey.app.ShakeyApp
 import java.awt.TrayIcon.MessageType
-import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.{TimeUnit, PriorityBlockingQueue}
 import shakey.internal.MessageNotifier.StockWithTime
 import org.joda.time.DateTime
 
@@ -57,9 +57,12 @@ class MessageNotifier(name: String) extends LoggerSupport {
   private def showStockInfo {
     //TODO 打开一个panel能够展示提醒的股票信息
     val builder = new StringBuilder
-    val it = MessageNotifier.queue.iterator()
-    while (it.hasNext) {
-      builder.append(it.next()).append("\n")
+    val queue = MessageNotifier.queue
+    0 until queue.size() foreach {
+      case i =>
+        val stock = queue.poll(1, TimeUnit.MILLISECONDS)
+        if (stock != null)
+          builder.append(stock)
     }
     trayIcon.displayMessage("Shakey", builder.toString(), MessageType.INFO)
     runFlag = false
