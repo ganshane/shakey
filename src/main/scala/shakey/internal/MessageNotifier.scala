@@ -62,7 +62,7 @@ class MessageNotifier(name: String) extends LoggerSupport {
       case i =>
         val stock = queue.poll(1, TimeUnit.MILLISECONDS)
         if (stock != null)
-          builder.append(stock)
+          builder.append(stock).append("\n")
     }
     trayIcon.displayMessage("Shakey", builder.toString(), MessageType.INFO)
     runFlag = false
