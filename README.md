@@ -23,6 +23,10 @@ shakey
 
 配置文件
 ========
+
+配置文件中比较关键的是策略的配置
+
+```
 <shakey>
   <!-- 日志文件存放路径 -->
   <log_file>${server.home}/log/shakey.log</log_file>
@@ -45,6 +49,7 @@ shakey
   -->
   <top_percent>0.1618</top_percent>
 </shakey>
+```
 
 
 
