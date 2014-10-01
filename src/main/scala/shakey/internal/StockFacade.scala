@@ -41,8 +41,10 @@ class StockFacade(periodicExecutor: PeriodicExecutor,
           //logger.debug("{} 5m: {}", stock.symbol, (stock.meter.getFiveMinuteRate * 5 * 60).asInstanceOf[Int])
           //logger.debug("{} 15m: {}", stock.symbol, (stock.meter.getFifteenMinuteRate * 15 * 60).asInstanceOf[Int])
           //TODO 大于多少倍算天量？,算法支撑
-            if (stock.rateOneSec > 0 && stock.rateOneSec < stock.meter.getFiveMinuteRate) {
+            if (stock.rateOneSec > 0 && stock.rateOneSec < fiveRate) {
               logger.error("=====================> {} rate:" + stock.rateOneSec * 60 * 5 + " now:" + stock.meter.getFiveMinuteRate * 5 * 60, stock.symbol)
+              val fiveRate = stock.meter.getFiveMinuteRate
+              stock.nowScale = fiveRate / stock.rateOneSec
               notifier.notify(stock)
             }
         }

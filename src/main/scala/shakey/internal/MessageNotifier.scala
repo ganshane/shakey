@@ -20,7 +20,12 @@ object MessageNotifier {
 
   class StockWithTime(val stock: Stock, val time: Long) extends Comparable[StockWithTime] {
     override def compareTo(o: StockWithTime): Int = {
-      o.time.compareTo(time)
+      var result = o.time.compareTo(time)
+      if (result == 0) {
+        result = o.stock.nowScale.compareTo(stock.nowScale)
+      }
+
+      result
     }
 
     override def equals(obj: scala.Any): Boolean = {
@@ -28,7 +33,7 @@ object MessageNotifier {
     }
 
     override def toString: String = {
-      new DateTime(time).toString("HH:mm") + " " + stock.symbol
+      new DateTime(time).toString("HH:mm") + " " + stock.symbol + " " + "%.2f".format(stock.nowScale)
     }
   }
 

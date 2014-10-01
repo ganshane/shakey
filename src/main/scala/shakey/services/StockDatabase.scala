@@ -17,4 +17,5 @@ class Stock{
   var symbol:String = _ //代码
   var rateOneSec:Double = _ //平均的量
   val meter:Meter = new Meter()
+  var nowScale: Double = 0.0
 }
