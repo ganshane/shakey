@@ -344,7 +344,8 @@ class MessageNotifierService {
 
     SwingUtilities.invokeLater(new Runnable {
       override def run(): Unit = {
-        INSTANCE.play
+        if (INSTANCE != null)
+          INSTANCE.play
       }
     })
   }
