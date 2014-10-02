@@ -22,6 +22,9 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
   private var errorMessage: String = null;
   private var sysMessage: String = null;
   {
+    val imageURL = getClass.getResource("/shakey.png");
+    val icon = new ImageIcon(imageURL, "shakey");
+    this.setIconImage(icon.getImage)
     val container: Container = getContentPane
     container.setLayout(null)
     val panel: JPanel = new JPanel
