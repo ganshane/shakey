@@ -2,14 +2,15 @@ package shakey.internal
 
 import javax.swing._
 import java.awt.{Font, Color, Container}
-import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.event.{WindowEvent, ActionEvent, ActionListener}
 import javax.swing.border.EtchedBorder
 import shakey.config.ShakeyConfig
+import shakey.app.ShakeyApp
 
 /**
  * Created by jcai on 14-9-29.
  */
-class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService) extends JWindow {
+class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService) extends JFrame {
   private val progressBar: JProgressBar = new JProgressBar
   private var timer1: Timer = null
   private var messageLabel: JLabel = null
@@ -56,6 +57,21 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
     setLocationRelativeTo(null)
     setVisible(true)
     setAlwaysOnTop(true)
+  }
+
+
+  override def processWindowEvent(e: WindowEvent): Unit = {
+    e.getID match {
+      case WindowEvent.WINDOW_CLOSING =>
+        val result = JOptionPane.showConfirmDialog(this, "确认要关闭海量检测工具吗？", "关闭", JOptionPane.YES_NO_OPTION)
+        if (result == JOptionPane.YES_OPTION) {
+          ShakeyApp.stopServer()
+          super.processWindowEvent(e)
+        }
+      case _ =>
+        super.processWindowEvent(e)
+
+    }
   }
 
   def incCountAndMessage(message: String) {
