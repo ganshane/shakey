@@ -14,6 +14,7 @@ object ShakeyClient extends LoggerSupport{
       new ApiLogger("in"),
       new ApiLogger("out"))
     controller.connect(config.ibApiHost,config.ibApiPort,1024)
+    controller.disconnect()
     controller
   }
   class ApiLogger(val prefix:String) extends ApiConnection.ILogger{

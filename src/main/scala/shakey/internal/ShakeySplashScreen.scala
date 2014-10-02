@@ -10,7 +10,7 @@ import shakey.app.ShakeyApp
 /**
  * Created by jcai on 14-9-29.
  */
-class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService) extends JFrame {
+class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService) extends JFrame("天量检测工具") {
   private val progressBar: JProgressBar = new JProgressBar
   private var timer1: Timer = null
   private var messageLabel: JLabel = null
@@ -55,16 +55,18 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
     container.add(progressBar)
     setSize(370, 215)
     setLocationRelativeTo(null)
-    setVisible(true)
     setAlwaysOnTop(true)
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    setResizable(false);
+    setVisible(true)
   }
-
 
   override def processWindowEvent(e: WindowEvent): Unit = {
     e.getID match {
       case WindowEvent.WINDOW_CLOSING =>
         val result = JOptionPane.showConfirmDialog(this, "确认要关闭海量检测工具吗？", "关闭", JOptionPane.YES_NO_OPTION)
         if (result == JOptionPane.YES_OPTION) {
+          timer1.stop()
           ShakeyApp.stopServer()
           super.processWindowEvent(e)
         }

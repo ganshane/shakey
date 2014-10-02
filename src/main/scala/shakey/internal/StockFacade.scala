@@ -1,9 +1,11 @@
 package shakey.internal
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{TimeUnit, Executors}
 import org.apache.tapestry5.ioc.annotations.PostInjection
 import org.apache.tapestry5.ioc.services.cron.{PeriodicExecutor, CronSchedule}
 import shakey.services.{LoggerSupport, StockDatabase}
+import org.apache.tapestry5.ioc.services.RegistryShutdownHub
+import com.ib.controller.ApiController
 
 /**
  * stock facade
@@ -16,7 +18,7 @@ class StockFacade(periodicExecutor: PeriodicExecutor,
   private val executor = Executors.newFixedThreadPool(2)
 
   @PostInjection
-  def start() {
+  def start(shutdownHub: RegistryShutdownHub, apiController: ApiController) {
     executor.submit(new Runnable {
       override def run(): Unit = {
         //启动历史数据的速率查询
@@ -28,6 +30,29 @@ class StockFacade(periodicExecutor: PeriodicExecutor,
     executor.submit(new Runnable {
       override def run(): Unit = {
         startReporter()
+      }
+    })
+
+    shutdownHub.addRegistryShutdownListener(new Runnable {
+      override def run(): Unit = {
+        logger.info("closing api controller...")
+        apiController.disconnect()
+        logger.info("closing stock facade background executor service....")
+        executor.shutdown
+        try {
+          if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+            executor.shutdownNow
+            if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+              logger.warn("executor {} not terminated", "stock facade")
+            }
+          }
+        }
+        catch {
+          case ie: InterruptedException => {
+            executor.shutdownNow
+            Thread.currentThread.interrupt
+          }
+        }
       }
     })
   }
