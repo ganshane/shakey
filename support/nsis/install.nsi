@@ -36,7 +36,7 @@
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "ShakeySetup.exe"
+OutFile "ShakeySetup-${SHAKEY_VERSION}.exe"
 InstallDir "$PROGRAMFILES\shakey"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -67,7 +67,7 @@ Section "MainSection" SEC01
 
   SetOutPath "$INSTDIR\lib"
   File /r "../../target/dependencies/*"
-  File "../../target/shakey-1.0-SNAPSHOT.jar"
+  File "../../target/shakey-${SHAKEY_VERSION}.jar"
 
   SetOutPath "$INSTDIR"
 

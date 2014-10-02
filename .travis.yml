@@ -2,8 +2,7 @@ language: java
 before_script:
   - sudo apt-get install nsis
 script:
-  - makensis support/nsis/app.nsi
-  - makensis support/nsis/install.nsi
+  - sh support/scripts/deploy.sh
 deploy:
   provider: releases
   api_key:

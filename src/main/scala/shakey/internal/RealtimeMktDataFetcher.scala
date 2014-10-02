@@ -36,7 +36,7 @@ class RealtimeMktDataFetcher(controller: ApiController,
 
   private class ShakeyRealTimeBarHandler(stock: Stock) extends IRealTimeBarHandler {
     override def realtimeBar(bar: Bar): Unit = {
-      //logger.debug("bar time:{} vol:{}",bar.formattedTime(),bar.volume())
+      logger.debug("bar time:{} vol:{}",bar.formattedTime(),bar.volume())
       stock.meter.mark(bar.volume()) //IB API每次返回的单位是100
     }
   }
