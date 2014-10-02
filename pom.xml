@@ -210,7 +210,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>shakey-${project.version}</finalName>
+              <finalName>shakey</finalName>
               <descriptors>
                 <descriptor>support/assembly/bin.xml</descriptor>
               </descriptors>

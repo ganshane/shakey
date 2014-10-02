@@ -1,6 +1,6 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Shakey Stock Scanner"
-!define PRODUCT_VERSION "0.1"
+!define PRODUCT_VERSION "${SHAKEY_VERSION}"
 !define PRODUCT_PUBLISHER "shakey"
 !define PRODUCT_WEB_SITE "http://www.ganshane.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\shakey.exe"
@@ -36,7 +36,7 @@
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "ShakeySetup-${SHAKEY_VERSION}.exe"
+OutFile "ShakeySetup.exe"
 InstallDir "$PROGRAMFILES\shakey"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
