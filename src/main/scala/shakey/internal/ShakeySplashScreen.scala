@@ -39,7 +39,7 @@ class ShakeySplashScreen(config: ShakeyConfig, notifier: MessageNotifierService)
     label.setBounds(125, 5, 280, 30)
     panel.add(label)
 
-    label = new JLabel("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;感谢 心灵捕手、华美、<br/> &lt;&lt;美股技术讨论群&gt;&gt;的兄弟姐妹们！</html>")
+    label = new JLabel("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;感谢 心灵捕手、华美、莫羽、<br/> &lt;&lt;美股技术讨论群&gt;&gt;的兄弟姐妹们！</html>")
     label.setFont(new Font("Song", Font.PLAIN, 12))
     label.setBounds(60, 35, 280, 60)
     panel.add(label)
