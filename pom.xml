@@ -6,8 +6,8 @@
   <version>1.5-SNAPSHOT</version>
   <name>Smart Stock Processor</name>
   <scm>
-    <connection>scm:git:git@github.com:jcai/shakey.git</connection>
-    <developerConnection>scm:git:git@github.com:jcai/shakey.git</developerConnection>
+    <connection>scm:git:git@github.com:ganshane/shakey.git</connection>
+    <developerConnection>scm:git:git@github.com:ganshane/shakey.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <dependencies>
