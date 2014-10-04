@@ -1,6 +1,6 @@
 shakey
 ======
-[![Build Status](https://secure.travis-ci.org/ganshane/shakey.svg?branch=master)](https://travis-ci.org/jcai/shakey)
+[![Build Status](https://secure.travis-ci.org/ganshane/shakey.svg?branch=master)](https://travis-ci.org/ganshane/shakey)
 
 本项目为美股投资项目，目的是为大家赚钱。。。。。
 
