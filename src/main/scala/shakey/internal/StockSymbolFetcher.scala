@@ -11,7 +11,6 @@ import shakey.ShakeyConstants
  * Created by jcai on 14-9-26.
  */
 object StockSymbolFetcher extends LoggerSupport {
-  private val url_formatter = "http://stock.finance.sina.com.cn/usstock/api/jsonp.php/x/US_CategoryService.getList?page=%s&num=60&sort=price&asc=0&market=&id="
 
   def main(args: Array[String]) {
     val stocks = fetchChinaStock.mkString(",")
@@ -21,7 +20,7 @@ object StockSymbolFetcher extends LoggerSupport {
   def fetchAllStock {
     1 to 200 foreach {
       case page =>
-        val content = RestClient.get(url_formatter.format(page), encoding = "GBK")
+        val content = RestClient.get(ShakeyConstants.US_STOCK_FORMATTER.format(page), encoding = "GBK")
         val jsonObject = new JSONObject(content.substring(3, content.length - 3))
         val count = jsonObject.getInt("count")
         val data = jsonObject.getJSONArray("data")
@@ -34,7 +33,6 @@ object StockSymbolFetcher extends LoggerSupport {
     }
   }
 
-  private val cn_stock_formatter = "http://money.finance.sina.com.cn/q/api/jsonp_v2.php/x/US_ChinaStockService.getData?page=%s&num=60&sort=volume&asc=0&market=&concept=0";
 
   def fetchChinaStock = {
     val buffer = new ArrayBuffer[String]()
@@ -42,7 +40,7 @@ object StockSymbolFetcher extends LoggerSupport {
     breakable {
       1 to 4 foreach {
         case page =>
-          val content = RestClient.get(cn_stock_formatter.format(page), encoding = "GBK")
+          val content = RestClient.get(ShakeyConstants.CN_STOCK_FORMATTER.format(page), encoding = "GBK")
           val jsonStr = content.substring(58, content.length - 1)
           val data = new JSONArray(jsonStr)
           0 until data.length() foreach {
