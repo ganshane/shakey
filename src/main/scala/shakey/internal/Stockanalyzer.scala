@@ -101,9 +101,9 @@ class Stockanalyzer extends LoggerSupport {
       queue.dequeueAll.foreach {
         s =>
           if (s.rate1 > 0 && s.rate2 < 0 && s.rate3 > 0)
-            println("<tr style=\"background-color:red\"><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>".format(s.symbol, s.rate1, s.rate2, s.rate3))
+            println("<tr style=\"background-color:red\"><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1*100, s.rate2*100, s.rate3*100))
           else
-            println("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>".format(s.symbol, s.rate1, s.rate2, s.rate3))
+            println("<tr><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1*100, s.rate2*100, s.rate3*100))
       }
     }
 
