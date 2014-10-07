@@ -1,9 +1,10 @@
 package shakey.internal
 
 import org.apache.tapestry5.json.{JSONArray, JSONObject}
-import shakey.services.LoggerSupport
+import shakey.services.{Stock, LoggerSupport}
 import scala.collection.mutable.ArrayBuffer
 import util.control.Breaks._
+import shakey.ShakeyConstants
 
 
 /**
@@ -61,5 +62,25 @@ object StockSymbolFetcher extends LoggerSupport {
     }
 
     buffer.toArray
+  }
+
+  def fetchStockRateByDayVolume(stock: Stock, rateOverflow: Double) {
+    val content = RestClient.get(ShakeyConstants.HISTORY_API_URL_FORMATTER.format(stock.symbol))
+    val jsonArray = new JSONArray(content)
+    val len = jsonArray.length()
+    var size = ShakeyConstants.HISTORY_SIZE
+    var begin = len - size
+    if (begin < 0)
+      begin = 0
+    size = len - begin
+    var volCount = 0
+    begin until jsonArray.length() foreach {
+      case i =>
+        val obj = jsonArray.getJSONObject(i)
+        volCount += obj.getInt("v")
+    }
+    val rate: Double = (volCount / 1.0 / size / ShakeyConstants.TRADE_SECONDS_IN_ONE_DAY / 100) * rateOverflow
+    logger.debug("symbol:{} rate:{}", stock.symbol, rate)
+    stock.rateOneSec = rate;
   }
 }
