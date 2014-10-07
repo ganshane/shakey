@@ -90,7 +90,6 @@ class HistoricalDataFetcher(config: ShakeyConfig,
   }
 
   private def fetchStockRateBy5MinuteHistoricalData(stock: Stock) {
-    Thread.sleep(11 * 1000)
     val contract = new NewContract();
     contract.symbol(stock.symbol);
     contract.secType(SecType.STK)
@@ -102,6 +101,7 @@ class HistoricalDataFetcher(config: ShakeyConfig,
       Types.DurationUnit.WEEK, Types.BarSize._5_mins,
       Types.WhatToShow.TRADES, true, new ShakeyHistoricalDataHandler(stock))
 
+    Thread.sleep(11 * 1000)
   }
 
   private class ShakeyHistoricalDataHandler(stock: Stock) extends IHistoricalDataHandler {
