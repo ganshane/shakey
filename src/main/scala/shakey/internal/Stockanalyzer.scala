@@ -1,12 +1,12 @@
 package shakey.internal
 
 import com.lmax.disruptor.dsl.Disruptor
-import com.lmax.disruptor.{EventTranslator, WorkHandler, EventHandler, EventFactory}
+import com.lmax.disruptor._
 import java.util.concurrent.{CountDownLatch, ThreadFactory, Executors}
 import java.util.concurrent.atomic.AtomicInteger
 import org.apache.tapestry5.json.JSONArray
 import shakey.internal.Stockanalyzer.StockDayEvent
-import shakey.services.LoggerSupport
+import shakey.services.{ShakeyException, LoggerSupport}
 import scala.collection.mutable
 
 /**
@@ -70,6 +70,8 @@ class Stockanalyzer extends LoggerSupport {
 
   protected def startDisruptor {
     disruptor = new Disruptor[StockDayEvent](EVENT_FACTORY, buffer, executors)
+    disruptor.handleExceptionsWith(new LogExceptionHandler)
+
     val workHandlers = 0 until fetchWorkerNum map {
       case i =>
         new FetchStockDayDataWorker
@@ -157,6 +159,28 @@ class Stockanalyzer extends LoggerSupport {
         logger.debug("seq:" + sequence + " symbol:{} rate:{}", event.symbol, r)
         queue += new StrongStock(event.symbol, r._1, r._2, r._3)
       }
+    }
+  }
+
+  class LogExceptionHandler extends ExceptionHandler with LoggerSupport {
+
+    def handleEventException(ex: Throwable, sequence: Long, event: Any) {
+      ex match {
+        case e: ShakeyException =>
+          logger.error(e.toString)
+        case e: InterruptedException =>
+        //do nothing
+        case _ =>
+          logger.error(ex.getMessage, ex)
+      }
+    }
+
+    def handleOnStartException(ex: Throwable) {
+      logger.error(ex.getMessage, ex)
+    }
+
+    def handleOnShutdownException(ex: Throwable) {
+      logger.error(ex.getMessage, ex)
     }
   }
 
