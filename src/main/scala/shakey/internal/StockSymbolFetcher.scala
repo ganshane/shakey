@@ -13,8 +13,7 @@ import shakey.ShakeyConstants
 object StockSymbolFetcher extends LoggerSupport {
 
   def main(args: Array[String]) {
-    val stocks = fetchChinaStock.mkString(",")
-    println(stocks)
+    analyzeStrongStockByDayVolume("YY")
   }
 
   def fetchAllStock {
@@ -80,5 +79,35 @@ object StockSymbolFetcher extends LoggerSupport {
     val rate: Double = (volCount / 1.0 / size / ShakeyConstants.TRADE_SECONDS_IN_ONE_DAY / 100) * rateOverflow
     logger.debug("symbol:{} rate:{}", stock.symbol, rate)
     stock.rateOneSec = rate;
+  }
+
+  def analyzeStrongStockByDayVolume(symbol: String): Double = {
+    val content = RestClient.get(ShakeyConstants.HISTORY_API_URL_FORMATTER.format(symbol))
+    val jsonArray = new JSONArray(content)
+    val len = jsonArray.length()
+    var size = ShakeyConstants.ONE_MONTH_HISTORY_SIZE
+    var begin = len - size
+    if (begin < 0)
+      begin = 0
+    size = len - begin
+
+    val xx = 0 until size toArray;
+
+    val yy = new Array[Double](size)
+    begin until jsonArray.length() foreach {
+      case i =>
+        val obj = jsonArray.getJSONObject(i)
+        //{d:"2012-11-21",o:"10.50",h:"11.75",l:"10.50",c:"11.31",v:"4567029"}
+        val h = obj.getDouble("h")
+        val l = obj.getDouble("l")
+        yy(i - begin) = l + (h - l) / 2
+        //yy(i-begin) = math.log(obj.getDouble("c"))
+        logger.debug("obj:{}", obj)
+    }
+
+    val rate = StockAlgorithm.LineSimulate(xx, yy)
+    logger.debug("rate:{}", rate)
+
+    rate
   }
 }

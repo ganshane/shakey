@@ -1,6 +1,8 @@
 package shakey.internal
 
-object AverageAlgorithm {
+import shakey.services.LoggerSupport
+
+object StockAlgorithm extends LoggerSupport {
   /**
    * 利用直线拟合求出一段时间内股价的趋势
    * @param xx 时间序列
@@ -9,11 +11,10 @@ object AverageAlgorithm {
    */
   def LineSimulate(xx:Array[Int],yy:Array[Double]):Double=
   {
-    var xxsum:Int=0
     var yysum:Double = 0
+    var xxsum: Double = 0
     var xxyy:Double = 0
     var xxxx:Double = 0
-
     0 until xx.length foreach{i=>
       xxsum += xx(i)
       yysum += yy(i)
@@ -21,11 +22,14 @@ object AverageAlgorithm {
       xxxx += xx(i)*xx(i)
     }
 
-    val D = xxxx-xxsum*xxsum;
-    if ( D==0 ) return(-1);
-    val a=(xxyy-xxsum*yysum)/D; // 斜率
-    val b=(-xxsum*xxyy+xxxx*yysum)/D; //截距
-    return a
+    val D = (xxsum * xxsum - xx.size * xxxx)
+    val a = (yysum * xxsum - xx.size * xxyy) / D
+    val b = (xxsum * xxyy - yysum * xxxx) / D
+
+    logger.debug(" 斜率a:{}", a)
+    logger.debug("截距b:{}", b)
+
+    a
   }
 
 }
