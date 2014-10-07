@@ -63,6 +63,12 @@
       <artifactId>httpclient</artifactId>
       <version>4.3.5</version>
     </dependency>
+    <!-- disruptor -->
+    <dependency>
+      <groupId>com.lmax</groupId>
+      <artifactId>disruptor</artifactId>
+      <version>3.2.1</version>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
