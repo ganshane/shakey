@@ -150,11 +150,13 @@ class Stockanalyzer extends LoggerSupport {
         Stockanalyzer.countDownLatch.countDown()
         return
       }
-
       val dayData = event.dayData
-      val r = (cal(dayData, 25), cal(dayData, 8), cal(dayData, 3))
-      logger.debug("seq:" + sequence + " symbol:{} rate:{}", event.symbol, r)
-      queue += new StrongStock(event.symbol, r._1, r._2, r._3)
+      val obj = dayData.getJSONObject(dayData.length() - 1)
+      if (obj.getInt("v") > 500000 && obj.getDouble("c") > 5.0) {
+        val r = (cal(dayData, 25), cal(dayData, 8), cal(dayData, 3))
+        logger.debug("seq:" + sequence + " symbol:{} rate:{}", event.symbol, r)
+        queue += new StrongStock(event.symbol, r._1, r._2, r._3)
+      }
     }
   }
 
