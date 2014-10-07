@@ -5,6 +5,7 @@ import shakey.services.{Stock, LoggerSupport}
 import scala.collection.mutable.ArrayBuffer
 import util.control.Breaks._
 import shakey.ShakeyConstants
+import scala.collection.mutable
 
 
 /**
@@ -12,24 +13,62 @@ import shakey.ShakeyConstants
  */
 object StockSymbolFetcher extends LoggerSupport {
 
-  def main(args: Array[String]) {
-    analyzeStrongStockByDayVolume("YY")
+  class StrongStock(val symbol: String, val rate1: Double, val rate2: Double, val rate3: Double) extends Comparable[StrongStock] {
+    override def compareTo(o: StrongStock): Int = {
+      rate1.compareTo(o.rate1)
+    }
+
+    override def toString: String = {
+      "%s,%s".format(symbol, rate1)
+    }
   }
 
-  def fetchAllStock {
-    1 to 200 foreach {
+  def main(args: Array[String]) {
+    val queue = new mutable.PriorityQueue[StrongStock]()
+    fetchAllStock.foreach {
+      case symbol =>
+        val r = analyzeStrongStockByDayVolume(symbol)
+        queue += new StrongStock(symbol, r._1, r._2, r._3)
+    }
+
+    queue.dequeueAll.foreach {
+      s =>
+        if (s.rate1 > 0 && s.rate2 < 0 && s.rate3 > 0)
+          println("<tr style=\"background-color:red\"><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>".format(s.symbol, s.rate1, s.rate2, s.rate3))
+        else
+          println("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>".format(s.symbol, s.rate1, s.rate2, s.rate3))
+    }
+  }
+
+  def fetchAllStock: Array[String] = {
+    val buf = new ArrayBuffer[String]()
+    1 to 133 foreach {
       case page =>
         val content = RestClient.get(ShakeyConstants.US_STOCK_FORMATTER.format(page), encoding = "GBK")
         val jsonObject = new JSONObject(content.substring(3, content.length - 3))
         val count = jsonObject.getInt("count")
-        val data = jsonObject.getJSONArray("data")
+        var data: JSONArray = null
+        try {
+          data = jsonObject.getJSONArray("data")
+        } catch {
+          case e: Throwable =>
+            logger.debug("json:{}", content)
+            logger.debug(e.getMessage, e)
+            throw e
+        }
+        logger.debug("process page:{} count:{}", page, count)
 
         0 until data.length() foreach {
           case j =>
             //{count:"8318",data:[{name:"Goldman Sachs Group Inc.",cname:"高盛集团",category:"",symbol:"GS",price:"184.09",diff:"-3.72",chg:"-1.98",preclose:"187.81",open:"187.46",high:"187.80",low:"183.46",amplitude:"2.31%",volume:"2999670",mktcap:"84400008279",pe:"12.12714049",market:"NYSE",category_id:"695"},
-            println("\"" + data.getJSONObject(j).getString("symbol") + "\",")
+            val obj = data.getJSONObject(j)
+            if (obj.getInt("volume") > 200000 && obj.getDouble("price") > 5.0) {
+              buf += obj.getString("symbol")
+            }
         }
     }
+
+    buf.toArray
   }
 
 
@@ -81,33 +120,34 @@ object StockSymbolFetcher extends LoggerSupport {
     stock.rateOneSec = rate;
   }
 
-  def analyzeStrongStockByDayVolume(symbol: String): Double = {
+  def analyzeStrongStockByDayVolume(symbol: String) = {
     val content = RestClient.get(ShakeyConstants.HISTORY_API_URL_FORMATTER.format(symbol))
     val jsonArray = new JSONArray(content)
     val len = jsonArray.length()
-    var size = ShakeyConstants.ONE_MONTH_HISTORY_SIZE
-    var begin = len - size
-    if (begin < 0)
-      begin = 0
-    size = len - begin
+    def cal(day_len: Int): Double = {
+      var size = day_len
+      var begin = len - size
+      if (begin < 0)
+        begin = 0
+      size = len - begin
 
-    val xx = 0 until size toArray;
+      val xx = 0 until size toArray;
 
-    val yy = new Array[Double](size)
-    begin until jsonArray.length() foreach {
-      case i =>
-        val obj = jsonArray.getJSONObject(i)
-        //{d:"2012-11-21",o:"10.50",h:"11.75",l:"10.50",c:"11.31",v:"4567029"}
-        val h = obj.getDouble("h")
-        val l = obj.getDouble("l")
-        yy(i - begin) = l + (h - l) / 2
-        //yy(i-begin) = math.log(obj.getDouble("c"))
-        logger.debug("obj:{}", obj)
+      val yy = new Array[Double](size)
+      begin until jsonArray.length() foreach {
+        case i =>
+          val obj = jsonArray.getJSONObject(i)
+          //{d:"2012-11-21",o:"10.50",h:"11.75",l:"10.50",c:"11.31",v:"4567029"}
+          val h = obj.getDouble("h")
+          val l = obj.getDouble("l")
+          yy(i - begin) = math.log(l + (h - l) / 2)
+      }
+
+      StockAlgorithm.LineSimulate(xx, yy)
     }
+    val r = (cal(25), cal(8), cal(3))
+    logger.debug("symbol:{} rate:{}", symbol, r)
 
-    val rate = StockAlgorithm.LineSimulate(xx, yy)
-    logger.debug("rate:{}", rate)
-
-    rate
+    r
   }
 }

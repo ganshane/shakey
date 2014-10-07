@@ -24,10 +24,7 @@ object StockAlgorithm extends LoggerSupport {
 
     val D = (xxsum * xxsum - xx.size * xxxx)
     val a = (yysum * xxsum - xx.size * xxyy) / D
-    val b = (xxsum * xxyy - yysum * xxxx) / D
-
-    logger.debug(" 斜率a:{}", a)
-    logger.debug("截距b:{}", b)
+    //val b = (xxsum * xxyy - yysum * xxxx) / D
 
     a
   }
