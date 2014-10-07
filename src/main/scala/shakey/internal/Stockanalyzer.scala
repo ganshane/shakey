@@ -2,7 +2,7 @@ package shakey.internal
 
 import com.lmax.disruptor.dsl.Disruptor
 import com.lmax.disruptor.{EventTranslator, WorkHandler, EventHandler, EventFactory}
-import java.util.concurrent.{ThreadFactory, Executors}
+import java.util.concurrent.{CountDownLatch, ThreadFactory, Executors}
 import java.util.concurrent.atomic.AtomicInteger
 import org.apache.tapestry5.json.JSONArray
 import shakey.internal.Stockanalyzer.StockDayEvent
@@ -17,11 +17,16 @@ object Stockanalyzer {
   class StockDayEvent {
     var symbol: String = null
     var dayData: JSONArray = null
+    var complete = false
   }
+
+  val countDownLatch = new CountDownLatch(1)
 
   def main(args: Array[String]) {
     val analyzer = new Stockanalyzer
     analyzer.start
+    countDownLatch.await()
+    analyzer.shutdownDisrutpor
   }
 }
 
@@ -44,16 +49,23 @@ class Stockanalyzer extends LoggerSupport {
 
   def start {
     startDisruptor
-    StockSymbolFetcher.fetchAllStock.foreach {
-      case symbol =>
-        //StockSymbolFetcher.fetchChinaStock.foreach{case symbol=>
+    StockSymbolFetcher.fetchAllStock {
+      symbol =>
+      //StockSymbolFetcher.fetchChinaStock.foreach{case symbol=>
         disruptor.publishEvent(new EventTranslator[StockDayEvent] {
           override def translateTo(event: StockDayEvent, sequence: Long): Unit = {
             event.symbol = symbol
             event.dayData = null
+            event.complete = false
           }
         })
     }
+
+    disruptor.publishEvent(new EventTranslator[StockDayEvent] {
+      override def translateTo(event: StockDayEvent, sequence: Long): Unit = {
+        event.complete = true
+      }
+    })
   }
 
   protected def startDisruptor {
@@ -76,6 +88,8 @@ class Stockanalyzer extends LoggerSupport {
   //抓取每天的数据
   class FetchStockDayDataWorker extends WorkHandler[StockDayEvent] {
     override def onEvent(event: StockDayEvent): Unit = {
+      if (event.complete)
+        return
       event.dayData = StockSymbolFetcher.fetchStockDayVolume(event.symbol)
     }
   }
@@ -83,7 +97,7 @@ class Stockanalyzer extends LoggerSupport {
   class TradeAnalysisHandler extends EventHandler[StockDayEvent] {
     private val queue = new mutable.PriorityQueue[StrongStock]()
 
-    def output {
+    def output() {
       queue.dequeueAll.foreach {
         s =>
           if (s.rate1 > 0 && s.rate2 < 0 && s.rate3 > 0)
@@ -127,6 +141,12 @@ class Stockanalyzer extends LoggerSupport {
     }
 
     override def onEvent(event: StockDayEvent, sequence: Long, endOfBatch: Boolean): Unit = {
+      if (event.complete) {
+        output()
+        Stockanalyzer.countDownLatch.countDown()
+        return
+      }
+
       val dayData = event.dayData
       val r = (cal(dayData, 25), cal(dayData, 8), cal(dayData, 3))
       logger.debug("seq:" + sequence + " symbol:{} rate:{}", event.symbol, r)
