@@ -102,6 +102,10 @@ class Stockanalyzer extends LoggerSupport {
         s =>
           if (s.rate1 > 0 && s.rate2 < 0 && s.rate3 > 0)
             println("<tr style=\"background-color:red\"><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1*100, s.rate2*100, s.rate3*100))
+          else if (s.rate1 > 0 && s.rate2 < 0)
+            println("<tr style=\"background-color:blue\"><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1 * 100, s.rate2 * 100, s.rate3 * 100))
+          else if (s.rate1 > 0 && s.rate3 < 0)
+            println("<tr style=\"background-color:gray\"><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1 * 100, s.rate2 * 100, s.rate3 * 100))
           else
             println("<tr><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1*100, s.rate2*100, s.rate3*100))
       }
