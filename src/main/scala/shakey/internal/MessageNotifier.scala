@@ -362,6 +362,7 @@ class MessageNotifierService {
 }
 
 class MessageFrame extends JFrame("天量检测工具") {
+  private var panel: JScrollPane = null
   private val messageArea = new JTextArea("", 10, 3);
   {
     val imageURL = getClass.getResource("/shakey.png");
@@ -376,7 +377,7 @@ class MessageFrame extends JFrame("天量检测工具") {
     messageArea.setEditable(false)
     //messageArea.setBounds(10, 10, 300, 100)
 
-    val panel: JScrollPane = new JScrollPane(messageArea)
+    panel = new JScrollPane(messageArea)
     panel.setBorder(new EtchedBorder)
     //panel.setBackground(new Color(255, 255, 255))
     panel.setBounds(10, 10, 350, 175)
@@ -412,6 +413,8 @@ class MessageFrame extends JFrame("天量检测工具") {
         msg = lines.take(linesKept).mkString("\n")
       }
       messageArea.setText(msg)
+      messageArea.setCaretPosition(0)
+      panel.getVerticalScrollBar().setValue(0)
     }
     this.setVisible(true)
   }
@@ -424,6 +427,8 @@ object MessageFrame {
   def main(args: Array[String]) {
     val frame = new MessageFrame
     val msg = 0 until 100 mkString (",\n")
+    frame.pop(msg)
+    frame.setVisible(true)
     frame.pop(msg)
     frame.setVisible(true)
   }
