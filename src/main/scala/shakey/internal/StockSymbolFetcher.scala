@@ -36,7 +36,9 @@ object StockSymbolFetcher extends LoggerSupport {
           case j =>
             //{count:"8318",data:[{name:"Goldman Sachs Group Inc.",cname:"高盛集团",category:"",symbol:"GS",price:"184.09",diff:"-3.72",chg:"-1.98",preclose:"187.81",open:"187.46",high:"187.80",low:"183.46",amplitude:"2.31%",volume:"2999670",mktcap:"84400008279",pe:"12.12714049",market:"NYSE",category_id:"695"},
             val obj = data.getJSONObject(j)
-            fun(obj.getString("symbol"))
+            if (obj.getInt("volume") > 500000 && obj.getDouble("price") > 5.0) {
+              fun(obj.getString("symbol"))
+            }
         }
     }
   }
