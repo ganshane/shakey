@@ -11,6 +11,7 @@ import java.awt.TrayIcon.MessageType
 import java.util.concurrent.{TimeUnit, PriorityBlockingQueue}
 import shakey.internal.MessageNotifier.StockWithTime
 import org.joda.time.DateTime
+import javax.swing.border.EtchedBorder
 
 /**
  * 消息通知
@@ -33,7 +34,7 @@ object MessageNotifier {
     }
 
     override def toString: String = {
-      new DateTime(time).toString("HH:mm") + " " + stock.symbol + " " + "%.2f".format(stock.nowScale)
+      new DateTime(time).toString("HH:mm") + " \t" + stock.symbol + "\t" + "%.2f".format(stock.nowScale)
     }
   }
 
@@ -49,6 +50,7 @@ class MessageNotifier(name: String) extends LoggerSupport {
   private val image2: Image = iconToImage(new BevelArrowIcon(BevelArrowIcon.DOWN, false, false))
   private var timer: Timer = _
   private val tray = SystemTray.getSystemTray
+  private var messageFrame: MessageFrame = _
   @volatile
   private var runFlag = false
 
@@ -57,9 +59,6 @@ class MessageNotifier(name: String) extends LoggerSupport {
   def play {
     ding.play()
     runFlag = true
-  }
-
-  private def showStockInfo {
     //TODO 打开一个panel能够展示提醒的股票信息
     val builder = new StringBuilder
     val queue = MessageNotifier.queue
@@ -69,7 +68,17 @@ class MessageNotifier(name: String) extends LoggerSupport {
         if (stock != null)
           builder.append(stock).append("\n")
     }
-    trayIcon.displayMessage("Shakey", builder.toString(), MessageType.INFO)
+    showStockInfo(builder.toString())
+  }
+
+  private def showStockInfo() {
+    messageFrame.setVisible(true)
+    runFlag = false
+  }
+
+  private def showStockInfo(message: String) {
+    messageFrame.pop(message)
+    //trayIcon.displayMessage("Shakey", builder.toString(), MessageType.INFO)
     runFlag = false
   }
 
@@ -120,6 +129,7 @@ class MessageNotifier(name: String) extends LoggerSupport {
     trayIcon.addMouseListener(mouseListener);
 
     tray.add(trayIcon);
+    messageFrame = new MessageFrame
 
     start
   }
@@ -348,6 +358,74 @@ class MessageNotifierService {
           INSTANCE.play
       }
     })
+  }
+}
+
+class MessageFrame extends JFrame("天量检测工具") {
+  private val messageArea = new JTextArea("", 10, 3);
+  {
+    val imageURL = getClass.getResource("/shakey.png");
+    val icon = new ImageIcon(imageURL, "shakey");
+    this.setIconImage(icon.getImage)
+    val container: Container = getContentPane
+    container.setLayout(null)
+
+    messageArea.setLineWrap(true)
+    messageArea.setFont(new Font("Song", Font.PLAIN, 10))
+    messageArea.setForeground(Color.RED)
+    messageArea.setEditable(false)
+    //messageArea.setBounds(10, 10, 300, 100)
+
+    val panel: JScrollPane = new JScrollPane(messageArea)
+    panel.setBorder(new EtchedBorder)
+    //panel.setBackground(new Color(255, 255, 255))
+    panel.setBounds(10, 10, 350, 175)
+    //panel.setLayout(null)
+    container.add(panel)
+
+
+    setSize(370, 215)
+    setAlwaysOnTop(true)
+    this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE)
+    setResizable(false);
+    setVisible(false)
+    //setLocationRelativeTo(null);
+    val windowWidth = this.getWidth();
+    //获得窗口宽
+    val windowHeight = this.getHeight();
+    //获得窗口高
+    val kit = Toolkit.getDefaultToolkit();
+    //定义工具包
+    val screenSize = kit.getScreenSize();
+    //获取屏幕的尺寸
+    val screenWidth = screenSize.width;
+    //获取屏幕的宽
+    val screenHeight = screenSize.height; //获取屏幕的高
+    this.setLocation(screenWidth - windowWidth, 0)
+  }
+
+  def pop(message: String) {
+    if (message != null && message.length > 0) {
+      msg = message + msg
+      val lines = msg.split("\n")
+      if (lines.size - linesKept > 0) {
+        msg = lines.take(linesKept).mkString("\n")
+      }
+      messageArea.setText(msg)
+    }
+    this.setVisible(true)
+  }
+
+  private var msg: String = ""
+  private val linesKept: Int = 30
+}
+
+object MessageFrame {
+  def main(args: Array[String]) {
+    val frame = new MessageFrame
+    val msg = 0 until 100 mkString (",\n")
+    frame.pop(msg)
+    frame.setVisible(true)
   }
 }
 
