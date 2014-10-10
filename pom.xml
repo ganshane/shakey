@@ -12,6 +12,7 @@
   </scm>
   <modules>
     <module>shakey-client</module>
+    <module>shakey-server</module>
   </modules>
   <dependencyManagement>
     <dependencies>
