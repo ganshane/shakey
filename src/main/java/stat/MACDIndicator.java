@@ -105,7 +105,7 @@ public class MACDIndicator {
             int paramSHORT,
             int paramLONG,
             int paramM) {
-        List<Map<String, Double>> result = new ArrayList<>();
+        List<Map<String, Double>> result = new ArrayList<Map<String, Double>>();
         // 得到短期的第一个EMA值（其实为MA值）
         double shortEMA = getMa(stockPrice,paramLONG- paramSHORT,paramSHORT);
         // 得到长期的第一个EMA值（其实为MA值）
