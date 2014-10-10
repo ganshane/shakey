@@ -8,7 +8,7 @@ deploy:
   api_key:
     secure: DHeO/Ppb3YvwW40WnseQJ+Q1Ut5ba6hXsA7ZJiLXXN/Uj0kZ1K8f3bW2gL9MGCNmpDoaIebrLxqiyMtBomO0fU+WpdIzr+l7Sy8ZijkuP8pCMWDxD6kL0izGtYYX+JI9WgeXNblq/h82ciMYXIa50GkiWbT81KuVkyWc4S7qt1U=
   file: 
-    - target/shakey-bin.tar.gz
+    - shakey-client/target/shakey-bin.tar.gz
     - support/nsis/ShakeySetup.exe
   skip_cleanup: true
   on:
