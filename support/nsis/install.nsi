@@ -36,7 +36,7 @@
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "ShakeySetup.exe"
+OutFile "ShakeyClientSetup-${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\shakey"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show

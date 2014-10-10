@@ -1,6 +1,8 @@
 language: java
 before_script:
   - sudo apt-get install nsis
+  - export VERSION=`cat pom.xml|grep -e '<version>\(.*\)</version>'|head -n 1|sed  's/^.*<version>\(.*\)<\/version>/\1/g'`
+  - echo $VERSION
 script:
   - sh support/scripts/deploy.sh
 deploy:
@@ -8,8 +10,8 @@ deploy:
   api_key:
     secure: DHeO/Ppb3YvwW40WnseQJ+Q1Ut5ba6hXsA7ZJiLXXN/Uj0kZ1K8f3bW2gL9MGCNmpDoaIebrLxqiyMtBomO0fU+WpdIzr+l7Sy8ZijkuP8pCMWDxD6kL0izGtYYX+JI9WgeXNblq/h82ciMYXIa50GkiWbT81KuVkyWc4S7qt1U=
   file: 
-    - shakey-client/target/shakey-bin.tar.gz
-    - support/nsis/ShakeySetup.exe
+    - shakey-client/target/shakey-client-${VERSION}-bin.tar.gz
+    - support/nsis/ShakeyClientSetup-${VERSION}.exe
   skip_cleanup: true
   on:
     tags: true

@@ -148,7 +148,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>shakey</finalName>
+              <finalName>shakey-client-${project.version}</finalName>
               <descriptors>
                 <descriptor>support/assembly/bin.xml</descriptor>
               </descriptors>
