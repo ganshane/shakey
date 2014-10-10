@@ -7,7 +7,7 @@ SilentInstall silent
 AutoCloseWindow true
 ShowInstDetails nevershow
  
-!define CLASSPATH "$EXEDIR\..\lib\shakey-${SHAKEY_VERSION}.jar"
+!define CLASSPATH "$EXEDIR\..\lib\shakey-client-${SHAKEY_VERSION}.jar"
 !define CLASS "shakey.app.ShakeyBootstrap"
  
 Section ""

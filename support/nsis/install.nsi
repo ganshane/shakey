@@ -66,8 +66,8 @@ Section "MainSection" SEC01
   File "../config/shakey.xml.example"
 
   SetOutPath "$INSTDIR\lib"
-  File /r "../../target/dependencies/*"
-  File "../../target/shakey-${SHAKEY_VERSION}.jar"
+  File /r "../../shakey-client/target/dependencies/*"
+  File "../../shakey-client/target/shakey-client-${SHAKEY_VERSION}.jar"
 
   SetOutPath "$INSTDIR"
 
