@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package shakey.internal.stat;
+package shakey.server.internal.stat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author 18meters
  */
 public class MACDIndicator {
@@ -55,7 +54,7 @@ public class MACDIndicator {
     //public DailyMACDIndicator(List<double> stock) {
 
     // }
-    private double getMa(List<Double> stockPrice, int start,int length) {
+    private double getMa(List<Double> stockPrice, int start, int length) {
         double totalClose = 0;
         double close = 0;
         int i = start;
@@ -65,7 +64,7 @@ public class MACDIndicator {
             totalClose += close;
             i++;
         } while (i < length);
-        return totalClose /length;
+        return totalClose / length;
 
     }
 
@@ -74,10 +73,9 @@ public class MACDIndicator {
      * <p>
      * 即收盘价短期和长期指数平滑移动平均线之间的差。</p>
      *
+     * @return 差离率（DIFF值）
      * @params shortEMA 短期指数平滑移动平均线
      * @params longEMA 长期指数平滑移动平均线
-     *
-     * @return 差离率（DIFF值）
      */
     private double getDIFFValue(
             double shortEMA,
@@ -93,21 +91,21 @@ public class MACDIndicator {
      *
      * @param stockPrice 股价序列
      * @param paramSHORT 短期
-     * @param paramLONG 长期
-     * @param paramM DEA周期
-     * paramLONG+paramM-1后数据才有效
+     * @param paramLONG  长期
+     * @param paramM     DEA周期
+     *                   paramLONG+paramM-1后数据才有效
      * @return 指数平滑异同移动平均线值序列
      */
-    private List< Map<String, Double>> calcStkDailyMACD(
+    private List<Map<String, Double>> calcStkDailyMACD(
             List<Double> stockPrice,
             int paramSHORT,
             int paramLONG,
             int paramM) {
         List<Map<String, Double>> result = new ArrayList<Map<String, Double>>();
         // 得到短期的第一个EMA值（其实为MA值）
-        double shortEMA = getMa(stockPrice,paramLONG- paramSHORT,paramSHORT);
+        double shortEMA = getMa(stockPrice, paramLONG - paramSHORT, paramSHORT);
         // 得到长期的第一个EMA值（其实为MA值）
-        double longEMA = getMa(stockPrice, 0,paramLONG);
+        double longEMA = getMa(stockPrice, 0, paramLONG);
         double diffValue = getDIFFValue(shortEMA, longEMA);
         // 计算的第一个diffValue作为DEA的第一个值 
         double deaValue = diffValue;
