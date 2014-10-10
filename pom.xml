@@ -17,7 +17,12 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.scala-lang</groupId>
+        <groupId>com.ganshane</groupId>
+        <artifactId>shakey-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+      <groupId>org.scala-lang</groupId>
         <artifactId>scala-library</artifactId>
         <version>${scala-release-version}</version>
       </dependency>
