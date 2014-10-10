@@ -16,6 +16,11 @@
       <artifactId>shakey-client</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- disruptor -->
+    <dependency>
+      <groupId>com.lmax</groupId>
+      <artifactId>disruptor</artifactId>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
