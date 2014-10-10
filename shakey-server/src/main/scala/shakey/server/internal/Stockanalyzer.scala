@@ -1,13 +1,14 @@
-package shakey.internal
+package shakey.server.internal
 
 import com.lmax.disruptor.dsl.Disruptor
 import com.lmax.disruptor._
 import java.util.concurrent.{CountDownLatch, ThreadFactory, Executors}
 import java.util.concurrent.atomic.AtomicInteger
 import org.apache.tapestry5.json.JSONArray
-import shakey.internal.Stockanalyzer.StockDayEvent
 import shakey.services.{ShakeyException, LoggerSupport}
 import scala.collection.mutable
+import shakey.internal.{StockAlgorithm, StockSymbolFetcher}
+import shakey.server.internal.Stockanalyzer.StockDayEvent
 
 /**
  * 针对股票的分析程序

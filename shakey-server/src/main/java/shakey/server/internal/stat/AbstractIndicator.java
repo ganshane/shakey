@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package shakey.internal.stat;
+package shakey.server.internal.stat;
 
 /**
- *
  * @author 18meters
  */
 public class AbstractIndicator {
-    
+
 }
