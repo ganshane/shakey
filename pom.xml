@@ -3,12 +3,12 @@
   <groupId>com.ganshane</groupId>
   <artifactId>shakey-project</artifactId>
   <packaging>pom</packaging>
-  <version>1.7-SNAPSHOT</version>
+  <version>1.6</version>
   <name>Smart Stock Processor</name>
   <scm>
     <connection>scm:git:git@github.com:ganshane/shakey.git</connection>
     <developerConnection>scm:git:git@github.com:ganshane/shakey.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>shakey-project-1.6</tag>
   </scm>
   <modules>
     <module>shakey-client</module>
