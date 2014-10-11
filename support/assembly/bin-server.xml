@@ -13,17 +13,10 @@
   <includeBaseDirectory>true</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <directory>../support/config</directory>
-      <includes>
-        <include>shakey.xml.example</include>
-      </includes>
-      <outputDirectory>config</outputDirectory>
-    </fileSet>
-    <fileSet>
       <directory>../support/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
-        <include>shakey</include>
+        <include>shakey-server</include>
       </includes>
       <fileMode>755</fileMode>
     </fileSet>
