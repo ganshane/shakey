@@ -1,55 +1,24 @@
 package shakey.server.app;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
+import shakey.services.AppBootstrap;
 
 /**
  * bootstrap
  *
  * @author jcai
  */
-public class ShakeyServerBootstrap {
+public class ShakeyServerBootstrap extends AppBootstrap {
     public static void main(String[] args) throws Exception {
-        String main = System.getProperty("ShakeyMainClass");
-        if (main == null) {
-            System.out.println("main class is null");
+        if (args.length == 0) {
+            System.err.println("main class is null");
         } else {
-            start(main, args);
-        }
-    }
-
-    protected static void start(String mainClassName, String[] args) throws Exception {
-        //get server home
-        String serverHome = System.getProperty("server.home", "support");
-        String LIB = serverHome + File.separator + "lib";
-
-        List<URL> urls = new ArrayList<URL>();
-        File[] files = new File(LIB).listFiles();
-
-        if (files != null) {
-            for (File f : files) {
-                urls.add(f.toURI().toURL());
+            if (args.length > 1) {
+                String[] appArgs = new String[args.length - 1];
+                System.arraycopy(args, 1, appArgs, 0, appArgs.length);
+                start(args[0], appArgs);
+            } else {
+                start(args[0], new String[]{});
             }
         }
-        // feed your URLs to a URLClassLoader!
-        ClassLoader classloader = new URLClassLoader(
-                urls.toArray(new URL[urls.size()]),
-                ClassLoader.getSystemClassLoader().getParent());
-
-        // well-behaved Java packages work relative to the
-        // context classloader.  Others don't (like commons-logging)
-        Thread.currentThread().setContextClassLoader(classloader);
-
-        // relative to that classloader, find the main class
-        // you want to bootstrap, which is the first cmd line arg
-        Class mainClass = classloader.loadClass(mainClassName);
-        Method main = mainClass.getMethod("main",
-                new Class[]{args.getClass()});
-
-        main.invoke(null, new Object[]{args});
     }
 }
