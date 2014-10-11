@@ -8,12 +8,46 @@ import org.apache.tapestry5.json.JSONArray
 import shakey.services.{ShakeyException, LoggerSupport}
 import scala.collection.mutable
 import shakey.internal.{StockAlgorithm, StockSymbolFetcher}
-import shakey.server.internal.Stockanalyzer.StockDayEvent
+import shakey.server.internal.Stockanalyzer.{StrongStock, StockDayEvent}
+import java.io.{Writer, File, FileWriter, OutputStreamWriter}
 
 /**
  * 针对股票的分析程序
  */
 object Stockanalyzer {
+
+  class StrongStock(val symbol: String, val rate1: Double, val rate2: Double, val rate3: Double) extends Comparable[StrongStock] {
+    override def compareTo(o: StrongStock): Int = {
+      rate1.compareTo(o.rate1)
+    }
+
+    override def toString: String = {
+      "%s,%s".format(symbol, rate1)
+    }
+
+    def isRed() = {
+      rate1 > 0 && rate2 < 0 && rate3 > 0
+    }
+
+    def isBlue() = {
+      rate1 > 0 && rate2 < 0
+    }
+
+    def isGray() = {
+      rate1 > 0 && rate3 < 0
+    }
+
+    def getColor(): String = {
+      if (isRed())
+        "red"
+      else if (isBlue())
+        "blue"
+      else if (isGray())
+        "gray"
+      else
+        "white"
+    }
+  }
 
   class StockDayEvent {
     var symbol: String = null
@@ -24,14 +58,19 @@ object Stockanalyzer {
   val countDownLatch = new CountDownLatch(1)
 
   def main(args: Array[String]) {
-    val analyzer = new Stockanalyzer
+    var writer = new OutputStreamWriter(System.out)
+    if (args.length > 0) {
+      writer = new FileWriter(new File(args(0)))
+    }
+    val analyzer = new Stockanalyzer(writer)
     analyzer.start
     countDownLatch.await()
+    writer.close()
     analyzer.shutdownDisrutpor
   }
 }
 
-class Stockanalyzer extends LoggerSupport {
+class Stockanalyzer(writer: Writer) extends LoggerSupport {
   private val buffer = 1 << 8
   private val fetchWorkerNum = 5
   private var disruptor: Disruptor[StockDayEvent] = null
@@ -101,27 +140,9 @@ class Stockanalyzer extends LoggerSupport {
     private val queue = new mutable.PriorityQueue[StrongStock]()
 
     def output() {
-      queue.dequeueAll.foreach {
-        s =>
-          if (s.rate1 > 0 && s.rate2 < 0 && s.rate3 > 0)
-            println("<tr style=\"background-color:red\"><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1*100, s.rate2*100, s.rate3*100))
-          else if (s.rate1 > 0 && s.rate2 < 0)
-            println("<tr style=\"background-color:blue\"><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1 * 100, s.rate2 * 100, s.rate3 * 100))
-          else if (s.rate1 > 0 && s.rate3 < 0)
-            println("<tr style=\"background-color:gray\"><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1 * 100, s.rate2 * 100, s.rate3 * 100))
-          else
-            println("<tr><td>%s</td><td>%2.4f</td><td>%2.4f</td><td>%2.4f</td></tr>".format(s.symbol, s.rate1*100, s.rate2*100, s.rate3*100))
-      }
-    }
-
-    class StrongStock(val symbol: String, val rate1: Double, val rate2: Double, val rate3: Double) extends Comparable[StrongStock] {
-      override def compareTo(o: StrongStock): Int = {
-        rate1.compareTo(o.rate1)
-      }
-
-      override def toString: String = {
-        "%s,%s".format(symbol, rate1)
-      }
+      val model = new java.util.HashMap[Any, Any]
+      model.put("stocks", queue.dequeueAll.toArray)
+      TemplateProcessor.processTemplate("/strong-stock.ftl", model, writer)
     }
 
     private def cal(jsonArray: JSONArray, day_len: Int): Double = {
