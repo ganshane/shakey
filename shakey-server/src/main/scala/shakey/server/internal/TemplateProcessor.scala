@@ -2,11 +2,9 @@ package shakey.server.internal
 
 import freemarker.template.{DefaultObjectWrapper, Configuration}
 import freemarker.cache.ClassTemplateLoader
-import java.io.{Writer, OutputStreamWriter}
+import java.io.Writer
 import shakey.ShakeyConstants
 import org.joda.time.DateTime
-import scala.collection.mutable
-import shakey.server.internal.Stockanalyzer.StrongStock
 
 
 /**
@@ -20,6 +18,7 @@ object TemplateProcessor {
   }
 
   def main(args: Array[String]) {
+    /*
     val model = new java.util.HashMap[Any, Any]
     val queue = new mutable.PriorityQueue[StrongStock]()
     queue += new StrongStock("xx", 1, 2, 3)
@@ -29,9 +28,10 @@ object TemplateProcessor {
 
     val writer = new OutputStreamWriter(System.out)
     processTemplate("/strong-stock.ftl", model, writer)
+    */
   }
 
-  def processTemplate(templateLocation: String, model: java.util.HashMap[Any, Any], writer: Writer) {
+  def processTemplate(templateLocation: String, model: java.util.HashMap[AnyRef, AnyRef], writer: Writer) {
     val template = configuration.getTemplate(templateLocation)
     model.put("date", DateTime.now.toString("YYYY-MM-dd HH:mm:ss"))
     model.put("date_title", DateTime.now.toString("YYYYMMdd"))
