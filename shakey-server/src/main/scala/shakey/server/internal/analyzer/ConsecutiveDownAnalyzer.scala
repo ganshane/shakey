@@ -1,17 +1,16 @@
-package shakey.server.internal
+package shakey.server.internal.analyzer
 
-import shakey.server.internal.Stockanalyzer.StockDayEvent
-import com.lmax.disruptor.EventHandler
 import shakey.services.LoggerSupport
 import org.apache.tapestry5.json.{JSONObject, JSONArray}
 import scala.annotation.tailrec
 import scala.collection.mutable
-import java.io.Writer
+import shakey.server.services.StockAnalyzer
+import java.util
 
 /**
  * 抓取连续下跌股票，并且出现下影线
  */
-class ConsecutiveDownAnalysisHandler(writer: Writer) extends EventHandler[StockDayEvent] with LoggerSupport {
+class ConsecutiveDownAnalyzer extends StockAnalyzer with LoggerSupport {
 
   class RbStock(val symbol: String, val rate: Double) extends Comparable[RbStock] {
     override def compareTo(o: RbStock): Int = {
@@ -25,17 +24,16 @@ class ConsecutiveDownAnalysisHandler(writer: Writer) extends EventHandler[StockD
 
   private val queue = new mutable.PriorityQueue[RbStock]()
 
-  override def onEvent(event: StockDayEvent, sequence: Long, endOfBatch: Boolean): Unit = {
-    if (event.complete) {
-      val model = new java.util.HashMap[Any, Any]
-      model.put("stocks", queue.dequeueAll.toArray)
-      TemplateProcessor.processTemplate("/rb.ftl", model, writer)
-      Stockanalyzer.countDownLatch.countDown()
-      return
-    }
-    val data = event.dayData
-    if (data.length() <= 20)
-      return
+  override def getTemplatePath: String = {
+    "/rb.ftl"
+  }
+
+
+  override def addDataToTemplateAfterFinishAnaysis(model: util.HashMap[AnyRef, AnyRef]): Unit = {
+    model.put("stocks", queue.dequeueAll.toArray)
+  }
+
+  override def processStockDataInOneYear(symbol: String, data: JSONArray): Unit = {
     val last_index = data.length() - 1
     val last = data.getJSONObject(last_index)
     val (isRb, rbRate) = calRb(last)
@@ -44,7 +42,7 @@ class ConsecutiveDownAnalysisHandler(writer: Writer) extends EventHandler[StockD
       if (backIsDown(data, last_index - 1, 3)) {
         //前面三个交易日都是下跌
         //logger.debug("symbol:{}",event.symbol)
-        queue += new RbStock(event.symbol, rbRate)
+        queue += new RbStock(symbol, rbRate)
       }
     }
   }
