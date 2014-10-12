@@ -26,7 +26,11 @@ object StockAnalyzerApp {
     if (args.length > 0) {
       dirOpt = Some(args(0))
     }
-    val analyzer = new StockAnalyzerApp(dirOpt)
+    var api = "sina"
+    if (args.length > 1) {
+      api = args(1)
+    }
+    val analyzer = new StockAnalyzerApp(dirOpt, api)
     analyzer.start
     analyzer.shutdown
   }
@@ -36,10 +40,10 @@ trait CountDowner {
   def countDown();
 }
 
-class StockAnalyzerApp(dirOpt: Option[String]) extends LoggerSupport with CountDowner {
+class StockAnalyzerApp(dirOpt: Option[String], api: String) extends LoggerSupport with CountDowner {
   private var countDownLatch: CountDownLatch = _
   private val buffer = 1 << 8
-  private val fetchWorkerNum = 5
+  private val fetchWorkerNum = 2
   private var disruptor: Disruptor[StockDayEvent] = null
   private val EVENT_FACTORY = new EventFactory[StockDayEvent] {
     def newInstance() = new StockDayEvent()
@@ -108,7 +112,12 @@ class StockAnalyzerApp(dirOpt: Option[String]) extends LoggerSupport with CountD
     override def onEvent(event: StockDayEvent): Unit = {
       if (event.complete)
         return
-      event.dayData = StockSymbolFetcher.fetchStockDayVolume(event.symbol)
+      api match {
+        case "sina" =>
+          event.dayData = StockSymbolFetcher.fetchStockDayVolume(event.symbol)
+        case "yahoo" =>
+          event.dayData = StockSymbolFetcher.fetchStockDayVolumeByYahoo(event.symbol)
+      }
     }
   }
 
