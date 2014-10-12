@@ -5,7 +5,7 @@ import com.lmax.disruptor.EventHandler
 import org.joda.time.DateTime
 import java.io.{File, FileWriter, OutputStreamWriter}
 import shakey.server.internal.StockAnalyzerApp.StockDayEvent
-import shakey.server.internal.analyzer.{ConsecutiveDownAnalyzer, StrongStockAnalyzer}
+import shakey.server.internal.analyzer.{DayVolumeAnalyzer, ConsecutiveDownAnalyzer, StrongStockAnalyzer}
 
 /**
  * Created by jcai on 14-10-12.
@@ -13,7 +13,8 @@ import shakey.server.internal.analyzer.{ConsecutiveDownAnalyzer, StrongStockAnal
 object StockAnalyzerRegistry {
   final val analyzers = List[StockAnalyzer](
     new ConsecutiveDownAnalyzer,
-    new StrongStockAnalyzer
+    new StrongStockAnalyzer,
+    new DayVolumeAnalyzer
   )
 
   def buildHandler(postDir: Option[String], countDown: CountDowner): List[EventHandler[StockDayEvent]] = {
@@ -24,7 +25,7 @@ object StockAnalyzerRegistry {
           case analyzer =>
             val index1 = analyzer.getTemplatePath.lastIndexOf("/")
             val index2 = analyzer.getTemplatePath.lastIndexOf(".")
-            val fileName = dir + filePrefix + analyzer.getTemplatePath.substring(index1 + 1, index2) + ".html"
+            val fileName = dir + filePrefix + analyzer.getTemplatePath.substring(index1 + 1, index2) + ".md"
             val writer = new FileWriter(new File(fileName))
             new AutoBuildStockAnalyzerHandler(analyzer, writer, countDown)
         }
