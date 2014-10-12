@@ -4,7 +4,10 @@ import org.apache.tapestry5.json.JSONArray;
 import org.apache.tapestry5.json.JSONObject;
 import shakey.server.services.StockAnalyzer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 出现天量股票分析.
@@ -21,12 +24,12 @@ public class DayVolumeAnalyzer implements StockAnalyzer {
         int size = 10;
         int untilPos = pos - 1 - size;
         for (int i = pos - 1; i > untilPos; i--) {
-            JSONObject obj = data.getJSONObject(pos);
+            JSONObject obj = data.getJSONObject(i);
             total += obj.getInt("v");
         }
         int av = total / size;
         int currentVolume = current.getInt("v");
-        if (currentVolume > av * 1.618)
+        if (currentVolume > av * 2)
             list.add(new VolumeStock(symbol, currentVolume * 1.0 / av));
     }
 
@@ -42,17 +45,33 @@ public class DayVolumeAnalyzer implements StockAnalyzer {
 
     private List<VolumeStock> list = new ArrayList<VolumeStock>();
 
-    private class VolumeStock implements Comparator<VolumeStock> {
-        public String symbol;
-        public double rate;
+    public static class VolumeStock implements Comparable<VolumeStock> {
+        private String symbol;
+        private double rate;
 
         public VolumeStock(String symbol, double rate) {
             this.symbol = symbol;
             this.rate = rate;
         }
 
-        public int compare(VolumeStock o1, VolumeStock o2) {
-            return Double.compare(o2.rate, o1.rate);
+        public String getSymbol() {
+            return symbol;
+        }
+
+        public void setSymbol(String symbol) {
+            this.symbol = symbol;
+        }
+
+        public double getRate() {
+            return rate;
+        }
+
+        public void setRate(double rate) {
+            this.rate = rate;
+        }
+
+        public int compareTo(VolumeStock o) {
+            return Double.compare(o.rate, rate);
         }
     }
 }
