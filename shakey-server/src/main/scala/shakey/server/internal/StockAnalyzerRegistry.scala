@@ -24,7 +24,7 @@ object StockAnalyzerRegistry {
           case analyzer =>
             val index1 = analyzer.getTemplatePath.lastIndexOf("/")
             val index2 = analyzer.getTemplatePath.lastIndexOf(".")
-            val fileName = dir + filePrefix + analyzer.getTemplatePath.substring(index1 + 1, index2) + ".html"
+            val fileName = dir + filePrefix + analyzer.getTemplatePath.substring(index1 + 1, index2) + ".md"
             val writer = new FileWriter(new File(fileName))
             new AutoBuildStockAnalyzerHandler(analyzer, writer, countDown)
         }
