@@ -72,7 +72,7 @@ object Stockanalyzer {
 
 class Stockanalyzer(writer: Writer) extends LoggerSupport {
   private val buffer = 1 << 8
-  private val fetchWorkerNum = 5
+  private val fetchWorkerNum = 2
   private var disruptor: Disruptor[StockDayEvent] = null
   private val EVENT_FACTORY = new EventFactory[StockDayEvent] {
     def newInstance() = new StockDayEvent()
@@ -132,7 +132,7 @@ class Stockanalyzer(writer: Writer) extends LoggerSupport {
     override def onEvent(event: StockDayEvent): Unit = {
       if (event.complete)
         return
-      event.dayData = StockSymbolFetcher.fetchStockDayVolume(event.symbol)
+      event.dayData = StockSymbolFetcher.fetchStockDayVolumeByYahoo(event.symbol)
     }
   }
 
@@ -175,6 +175,8 @@ class Stockanalyzer(writer: Writer) extends LoggerSupport {
         return
       }
       val dayData = event.dayData
+      if (dayData.length() == 0) //没有日数据
+        return
       val obj = dayData.getJSONObject(dayData.length() - 1)
       if (obj.getInt("v") > 500000 && obj.getDouble("c") > 5.0) {
         val r = (cal(dayData, 25), cal(dayData, 8), cal(dayData, 3))
