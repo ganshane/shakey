@@ -55,29 +55,34 @@ object Stockanalyzer {
     var complete = false
   }
 
-  val countDownLatch = new CountDownLatch(1)
+  val countDownLatch = new CountDownLatch(2)
 
   def main(args: Array[String]) {
-    var writer = new OutputStreamWriter(System.out)
+    var strongWriter = new OutputStreamWriter(System.out)
     if (args.length > 0) {
-      writer = new FileWriter(new File(args(0)))
+      strongWriter = new FileWriter(new File(args(0)))
     }
-    val analyzer = new Stockanalyzer(writer)
+    var rbWriter = new OutputStreamWriter(System.out)
+    if (args.length > 1) {
+      rbWriter = new FileWriter(new File(args(1)))
+    }
+    val analyzer = new Stockanalyzer(strongWriter, rbWriter)
     analyzer.start
     countDownLatch.await()
-    writer.close()
+    strongWriter.close()
+    rbWriter.close()
     analyzer.shutdownDisrutpor
   }
 }
 
-class Stockanalyzer(writer: Writer) extends LoggerSupport {
+class Stockanalyzer(strongWriter: Writer, rbWriter: Writer) extends LoggerSupport {
   private val buffer = 1 << 8
   private val fetchWorkerNum = 5
   private var disruptor: Disruptor[StockDayEvent] = null
   private val EVENT_FACTORY = new EventFactory[StockDayEvent] {
     def newInstance() = new StockDayEvent()
   }
-  val executors = Executors.newFixedThreadPool(fetchWorkerNum + 1, new ThreadFactory {
+  val executors = Executors.newFixedThreadPool(fetchWorkerNum + 2, new ThreadFactory {
     private val seq = new AtomicInteger(0)
 
     def newThread(p1: Runnable) = {
@@ -116,7 +121,7 @@ class Stockanalyzer(writer: Writer) extends LoggerSupport {
       case i =>
         new FetchStockDayDataWorker
     }
-    disruptor.handleEventsWithWorkerPool(workHandlers: _*).`then`(new TradeAnalysisHandler)
+    disruptor.handleEventsWithWorkerPool(workHandlers: _*).`then`(new TradeAnalysisHandler, new ConsecutiveDownAnalysisHandler(rbWriter))
     disruptor.start()
   }
 
@@ -142,7 +147,7 @@ class Stockanalyzer(writer: Writer) extends LoggerSupport {
     def output() {
       val model = new java.util.HashMap[Any, Any]
       model.put("stocks", queue.dequeueAll.toArray)
-      TemplateProcessor.processTemplate("/strong-stock.ftl", model, writer)
+      TemplateProcessor.processTemplate("/strong-stock.ftl", model, strongWriter)
     }
 
     private def cal(jsonArray: JSONArray, day_len: Int): Double = {
@@ -175,10 +180,12 @@ class Stockanalyzer(writer: Writer) extends LoggerSupport {
         return
       }
       val dayData = event.dayData
+      if (dayData.length() == 0) //没有日数据
+        return
       val obj = dayData.getJSONObject(dayData.length() - 1)
       if (obj.getInt("v") > 500000 && obj.getDouble("c") > 5.0) {
         val r = (cal(dayData, 25), cal(dayData, 8), cal(dayData, 3))
-        logger.debug("seq:" + sequence + " symbol:{} rate:{}", event.symbol, r)
+        //logger.debug("seq:" + sequence + " symbol:{} rate:{}", event.symbol, r)
         queue += new StrongStock(event.symbol, r._1, r._2, r._3)
       }
     }

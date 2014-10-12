@@ -108,6 +108,26 @@ object StockSymbolFetcher extends LoggerSupport {
     new JSONArray(content)
   }
 
+  def fetchStockDayVolumeByYahoo(symbol: String): JSONArray = {
+    val content = RestClient.get(ShakeyConstants.YAHOO_DAY_API.format(symbol))
+    val result = new JSONArray()
+    content.split("\n").drop(18).foreach {
+      case line =>
+        val jsonObject = new JSONObject()
+        val arr = line.split(",")
+        jsonObject.put("d", arr(0))
+        jsonObject.put("c", arr(1))
+        jsonObject.put("h", arr(2))
+        jsonObject.put("l", arr(3))
+        jsonObject.put("o", arr(4))
+        jsonObject.put("v", arr(5))
+
+        result.put(jsonObject)
+    }
+
+    result
+  }
+
   def fetchStockRateByDayVolume(stock: Stock, rateOverflow: Double) {
     val content = RestClient.get(ShakeyConstants.HISTORY_API_URL_FORMATTER.format(stock.symbol))
     val jsonArray = new JSONArray(content)
