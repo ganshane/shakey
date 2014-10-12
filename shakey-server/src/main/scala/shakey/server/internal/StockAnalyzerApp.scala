@@ -8,6 +8,7 @@ import org.apache.tapestry5.json.JSONArray
 import shakey.services.{ShakeyException, LoggerSupport}
 import shakey.internal.StockSymbolFetcher
 import shakey.server.internal.StockAnalyzerApp.StockDayEvent
+import scala.io.Source
 
 /**
  * 针对股票的分析程序
@@ -68,9 +69,11 @@ class StockAnalyzerApp(dirOpt: Option[String], api: String) extends LoggerSuppor
     })
 
     startDisruptor(handlers)
-    StockSymbolFetcher.fetchAllStock {
-      symbol =>
-      //StockSymbolFetcher.fetchChinaStock.foreach{case symbol=>
+
+    var i = 0
+    Source.fromInputStream(getClass.getResourceAsStream("/stocks")).getLines().foreach {
+      case symbol =>
+        //StockSymbolFetcher.fetchChinaStock.foreach{case symbol=>
         disruptor.publishEvent(new EventTranslator[StockDayEvent] {
           override def translateTo(event: StockDayEvent, sequence: Long): Unit = {
             event.symbol = symbol
@@ -78,7 +81,11 @@ class StockAnalyzerApp(dirOpt: Option[String], api: String) extends LoggerSuppor
             event.complete = false
           }
         })
+        i += 1
+        if ((i % 100) == 0)
+          logger.info("process {} stock is {}", i, symbol)
     }
+    logger.info("finish process {} stocks ")
 
     disruptor.publishEvent(new EventTranslator[StockDayEvent] {
       override def translateTo(event: StockDayEvent, sequence: Long): Unit = {
