@@ -85,7 +85,7 @@ class StockAnalyzerApp(dirOpt: Option[String], api: String) extends LoggerSuppor
         if ((i % 100) == 0)
           logger.info("process {} stock is {}", i, symbol)
     }
-    logger.info("finish process {} stocks ")
+    logger.info("finish process {} stocks ", i)
 
     disruptor.publishEvent(new EventTranslator[StockDayEvent] {
       override def translateTo(event: StockDayEvent, sequence: Long): Unit = {
