@@ -15,7 +15,7 @@ class ConsecutiveDownAnalyzer extends StockAnalyzer {
     "/rb.ftl"
   }
 
-  override def addDataToTemplateAfterFinishAnaysis(model: util.HashMap[AnyRef, AnyRef]): Unit = {
+  override def addDataToTemplateAfterAnalysis(model: util.HashMap[AnyRef, AnyRef]): Unit = {
     model.put("stocks", queue.dequeueAll.toArray)
   }
 
