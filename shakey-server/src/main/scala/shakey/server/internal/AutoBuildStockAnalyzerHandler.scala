@@ -12,7 +12,7 @@ class AutoBuildStockAnalyzerHandler(analyzer: StockAnalyzer, writer: Writer, cou
   override def onEvent(event: StockDayEvent, sequence: Long, endOfBatch: Boolean): Unit = {
     if (event.complete) {
       val model = new java.util.HashMap[AnyRef, AnyRef]
-      analyzer.addDataToTemplateAfterFinishAnaysis(model)
+      analyzer.addDataToTemplateAfterAnalysis(model)
       TemplateProcessor.processTemplate(analyzer.getTemplatePath, model, writer)
       writer.close()
       countDownLatch.countDown()

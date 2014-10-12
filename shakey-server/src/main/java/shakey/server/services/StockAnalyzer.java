@@ -20,11 +20,11 @@ public interface StockAnalyzer {
     public void processStockDataInOneYear(String symbol, JSONArray data);
 
     /**
-     * 增加data到模板引擎
+     * 分析完成之后，把分析的数据添加到模板引擎
      *
      * @param model 模板数据
      */
-    public void addDataToTemplateAfterFinishAnaysis(HashMap<Object, Object> model);
+    public void addDataToTemplateAfterAnalysis(HashMap<Object, Object> model);
 
     /**
      * 模板的路径
