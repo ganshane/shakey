@@ -5,7 +5,7 @@ import com.lmax.disruptor.EventHandler
 import org.joda.time.DateTime
 import java.io.{File, FileWriter, OutputStreamWriter}
 import shakey.server.internal.StockAnalyzerApp.StockDayEvent
-import shakey.server.internal.analyzer.{DayVolumeAnalyzer, ConsecutiveDownAnalyzer, StrongStockAnalyzer}
+import shakey.server.internal.analyzer.{R20Analyzer, DayVolumeAnalyzer, ConsecutiveDownAnalyzer, StrongStockAnalyzer}
 
 /**
  * Created by jcai on 14-10-12.
@@ -14,6 +14,7 @@ object StockAnalyzerRegistry {
   final val analyzers = List[StockAnalyzer](
     new ConsecutiveDownAnalyzer,
     new StrongStockAnalyzer,
+    new R20Analyzer,
     new DayVolumeAnalyzer
   )
 
