@@ -2,9 +2,9 @@ package shakey.server.internal.analyzer
 
 import scala.collection.mutable
 import org.apache.tapestry5.json.JSONArray
-import shakey.internal.StockAlgorithm
 import shakey.server.services.StockAnalyzer
 import java.util
+import shakey.server.internal.stat.StockAlgorithm
 
 /**
  * Created by jcai on 14-10-12.
@@ -76,7 +76,7 @@ class StrongStockAnalyzer extends StockAnalyzer {
         yy(i - begin) = math.log(l + (h - l) / 2)
     }
 
-    StockAlgorithm.LineSimulate(xx, yy)
+    StockAlgorithm.lineSimulate(xx, yy)
   }
 
   override def processStockDataInOneYear(symbol: String, dayData: JSONArray): Unit = {
