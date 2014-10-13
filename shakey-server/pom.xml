@@ -26,7 +26,12 @@
       <version>2.3.20</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
+      <groupId>net.sf.jopt-simple</groupId>
+      <artifactId>jopt-simple</artifactId>
+      <version>4.7</version>
+    </dependency>
+    <dependency>
+    <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <type>jar</type>
       <scope>test</scope>
