@@ -1,5 +1,8 @@
 package shakey.server.internal.stat;
 
+import org.apache.tapestry5.json.JSONArray;
+import org.apache.tapestry5.json.JSONObject;
+
 /**
  * 股票相关算法
  *
@@ -31,5 +34,29 @@ public class StockAlgorithm {
         //val b = (xxsum * xxyy - yysum * xxxx) / D
 
         return a;
+    }
+
+    public static double calStrongRate(JSONArray jsonArray, int day_len) {
+        int len = jsonArray.length();
+        int size = day_len;
+        int begin = len - size;
+        if (begin < 0)
+            begin = 0;
+        size = len - begin;
+
+        int[] xx = new int[size];
+        for (int i = 0; i < size; i++)
+            xx[i] = i;
+
+        double[] yy = new double[size];
+        for (int i = begin; i < jsonArray.length(); i++) {
+            JSONObject obj = jsonArray.getJSONObject(i);
+            //{d:"2012-11-21",o:"10.50",h:"11.75",l:"10.50",c:"11.31",v:"4567029"}
+            double h = obj.getDouble("h");
+            double l = obj.getDouble("l");
+            yy[i - begin] = Math.log(l + (h - l) / 2);
+        }
+
+        return StockAlgorithm.lineSimulate(xx, yy);
     }
 }
