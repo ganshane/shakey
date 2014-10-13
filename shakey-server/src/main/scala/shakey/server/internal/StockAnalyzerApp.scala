@@ -95,13 +95,13 @@ class StockAnalyzerApp(dirOpt: Option[String], api: String, countOpt: Option[Int
         if ((i % 100) == 0)
           logger.info("process {} stock is {}", i, symbol)
     }
-    logger.info("finish process {} stocks ", i)
 
     disruptor.publishEvent(new EventTranslator[StockDayEvent] {
       override def translateTo(event: StockDayEvent, sequence: Long): Unit = {
         event.complete = true
       }
     })
+    logger.info("{} stocks submitted", i)
     countDownLatch.await()
   }
 
