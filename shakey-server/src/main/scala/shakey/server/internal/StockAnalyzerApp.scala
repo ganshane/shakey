@@ -9,6 +9,7 @@ import shakey.services.{ShakeyException, LoggerSupport}
 import shakey.internal.StockSymbolFetcher
 import shakey.server.internal.StockAnalyzerApp.StockDayEvent
 import scala.io.Source
+import joptsimple.OptionParser
 
 /**
  * 针对股票的分析程序
@@ -23,17 +24,19 @@ object StockAnalyzerApp {
 
 
   def main(args: Array[String]) {
+    val parser = new OptionParser("d::a::c::");
+    val options = parser.parse(args: _*)
     var dirOpt: Option[String] = None
-    if (args.length > 0) {
-      dirOpt = Some(args(0))
+    if (options.has("d")) {
+      dirOpt = Some(options.valueOf("d").asInstanceOf[String])
     }
     var api = "sina"
-    if (args.length > 1) {
-      api = args(1)
+    if (options.has("a")) {
+      api = options.valueOf("d").asInstanceOf[String]
     }
     var countOpt: Option[Int] = None
-    if (args.length > 2) {
-      countOpt = Some(args(2).toInt)
+    if (options.has("c")) {
+      countOpt = Some(options.valueOf("c").asInstanceOf[String].toInt)
     }
     val analyzer = new StockAnalyzerApp(dirOpt, api, countOpt)
     analyzer.start
@@ -78,7 +81,7 @@ class StockAnalyzerApp(dirOpt: Option[String], api: String, countOpt: Option[Int
     var lines = Source.fromInputStream(getClass.getResourceAsStream("/stocks")).getLines();
     if (countOpt.isDefined)
       lines = lines.take(countOpt.get)
-    lines.take(100).foreach {
+    lines.foreach {
       case symbol =>
         //StockSymbolFetcher.fetchChinaStock.foreach{case symbol=>
         disruptor.publishEvent(new EventTranslator[StockDayEvent] {
