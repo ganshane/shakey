@@ -1,4 +1,4 @@
-package shakey.server.internal.stat
+package shakey.server.internal.algorithm
 
 import shakey.services.LoggerSupport
 import org.junit.Test

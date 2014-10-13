@@ -10,6 +10,6 @@ categories: stock
  <td>天量指数</td>
 </tr>
 <#list stocks as s>
-  <tr><td><a href="http://stock.finance.sina.com.cn/usstock/quotes/${s.symbol}.html" target="_blank">${s.symbol}</a></td><td>${s.rate}</td></tr>
+  <tr><td><a href="http://stock.finance.sina.com.cn/usstock/quotes/${s.symbol()}.html" target="_blank">${s.symbol()}</a></td><td>${s.rate()}</td></tr>
 </#list>
 </table>
