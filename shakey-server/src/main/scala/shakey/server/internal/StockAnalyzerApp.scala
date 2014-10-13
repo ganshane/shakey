@@ -32,7 +32,7 @@ object StockAnalyzerApp {
     }
     var api = "sina"
     if (options.has("a")) {
-      api = options.valueOf("d").asInstanceOf[String]
+      api = options.valueOf("a").asInstanceOf[String]
     }
     var countOpt: Option[Int] = None
     if (options.has("c")) {
