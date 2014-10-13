@@ -18,7 +18,7 @@ class DayVolumeAnalyzer extends StockAnalyzer {
     val size: Int = 10
     val untilPos: Int = pos - 1 - size
 
-    val av = (pos - 1).until(untilPos).
+    val av = Range(pos - 1, untilPos, -1).
       map(data.getJSONObject(_).getInt("v")).
       sum / size
 

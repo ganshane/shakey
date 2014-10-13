@@ -2,9 +2,9 @@ package shakey.server.internal.analyzer
 
 import shakey.server.services.StockAnalyzer
 import org.apache.tapestry5.json.{JSONArray, JSONObject}
-import shakey.server.internal.stat.StockAlgorithm
 import java.util
 import scala.collection.mutable.ListBuffer
+import shakey.server.internal.algorithm.StockAlgorithm
 
 /**
  * 分析触碰到R20的股票

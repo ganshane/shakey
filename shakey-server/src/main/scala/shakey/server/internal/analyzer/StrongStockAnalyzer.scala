@@ -4,7 +4,7 @@ import scala.collection.mutable
 import org.apache.tapestry5.json.JSONArray
 import shakey.server.services.StockAnalyzer
 import java.util
-import shakey.server.internal.stat.StockAlgorithm
+import shakey.server.internal.algorithm.StockAlgorithm
 
 /**
  * Created by jcai on 14-10-12.

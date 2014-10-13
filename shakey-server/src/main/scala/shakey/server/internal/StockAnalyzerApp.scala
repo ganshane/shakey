@@ -78,7 +78,7 @@ class StockAnalyzerApp(dirOpt: Option[String], api: String, countOpt: Option[Int
     var lines = Source.fromInputStream(getClass.getResourceAsStream("/stocks")).getLines();
     if (countOpt.isDefined)
       lines = lines.take(countOpt.get)
-    lines.foreach {
+    lines.take(100).foreach {
       case symbol =>
         //StockSymbolFetcher.fetchChinaStock.foreach{case symbol=>
         disruptor.publishEvent(new EventTranslator[StockDayEvent] {
