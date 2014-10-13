@@ -31,7 +31,11 @@ object StockAnalyzerApp {
     if (args.length > 1) {
       api = args(1)
     }
-    val analyzer = new StockAnalyzerApp(dirOpt, api)
+    var countOpt: Option[Int] = None
+    if (args.length > 2) {
+      countOpt = Some(args(2).toInt)
+    }
+    val analyzer = new StockAnalyzerApp(dirOpt, api, countOpt)
     analyzer.start
     analyzer.shutdown
   }
@@ -41,7 +45,7 @@ trait CountDowner {
   def countDown();
 }
 
-class StockAnalyzerApp(dirOpt: Option[String], api: String) extends LoggerSupport with CountDowner {
+class StockAnalyzerApp(dirOpt: Option[String], api: String, countOpt: Option[Int]) extends LoggerSupport with CountDowner {
   private var countDownLatch: CountDownLatch = _
   private val buffer = 1 << 8
   private val fetchWorkerNum = 2
@@ -71,7 +75,10 @@ class StockAnalyzerApp(dirOpt: Option[String], api: String) extends LoggerSuppor
     startDisruptor(handlers)
 
     var i = 0
-    Source.fromInputStream(getClass.getResourceAsStream("/stocks")).getLines().foreach {
+    var lines = Source.fromInputStream(getClass.getResourceAsStream("/stocks")).getLines();
+    if (countOpt.isDefined)
+      lines = lines.take(countOpt.get)
+    lines.foreach {
       case symbol =>
         //StockSymbolFetcher.fetchChinaStock.foreach{case symbol=>
         disruptor.publishEvent(new EventTranslator[StockDayEvent] {

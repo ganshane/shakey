@@ -36,6 +36,14 @@ public class StockAlgorithm {
         return a;
     }
 
+    /**
+     * 计算day_len天数内股价的强度系数
+     *
+     * @param jsonArray 一串的股票数据, 数据格式如下:
+     *                  {d:"2012-11-21",o:"10.50",h:"11.75",l:"10.50",c:"11.31",v:"4567029"}
+     * @param day_len   计算的天数
+     * @return 股价的强度系数
+     */
     public static double calStrongRate(JSONArray jsonArray, int day_len) {
         int len = jsonArray.length();
         int size = day_len;
