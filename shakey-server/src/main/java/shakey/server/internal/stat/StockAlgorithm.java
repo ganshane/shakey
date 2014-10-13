@@ -67,4 +67,13 @@ public class StockAlgorithm {
 
         return StockAlgorithm.lineSimulate(xx, yy);
     }
+
+    public static double average(double[] data, int from, int until) {
+        double total = 0.0;
+        int i = from;
+        for (; i < until && i < data.length; i++) {
+            total += data[i];
+        }
+        return total / (i - from);
+    }
 }
