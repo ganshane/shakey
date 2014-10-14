@@ -1,6 +1,7 @@
 package shakey.server.internal.algorithm
 
 import org.apache.tapestry5.json.{JSONArray, JSONObject}
+import shakey.services.LoggerSupport
 
 
 /**
@@ -8,7 +9,9 @@ import org.apache.tapestry5.json.{JSONArray, JSONObject}
  *
  * @author jcai
  */
-object StockAlgorithm {
+object StockAlgorithm
+  extends LoggerSupport
+  with SMA {
   /**
    * 利用直线拟合求出一段时间内股价的趋势
    *
