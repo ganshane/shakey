@@ -19,8 +19,11 @@ trait EMA {
     val multiplier = BigDecimal(2.0) / (period + 1);
     val initialSMA = input.take(period).map(BigDecimal(_)).sum / period
 
+    //从周期起始位置开始计算EMA
     val inputStream  = input.toStream.drop(period)
-    lazy val stream:Stream[BigDecimal] = initialSMA #:: stream.zip(inputStream).map{case (last,value) =>
+
+    lazy val stream: Stream[BigDecimal] = initialSMA #:: inputStream.zip(stream).map {
+      case (value, last) =>
        (value - last) * multiplier + last
     }
 
