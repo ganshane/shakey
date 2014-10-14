@@ -7,7 +7,7 @@ import scala.math.BigDecimal.RoundingMode
 /**
  * Created by jcai on 14-10-7.
  */
-class StockAlgorithmTest extends LoggerSupport {
+class SMATest extends LoggerSupport {
   @Test
   def test_SMA {
     val inputValues = Array[Double](
