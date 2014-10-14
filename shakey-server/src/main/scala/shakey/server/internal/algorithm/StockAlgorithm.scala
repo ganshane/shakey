@@ -1,6 +1,7 @@
 package shakey.server.internal.algorithm
 
 import org.apache.tapestry5.json.{JSONArray, JSONObject}
+import shakey.services.LoggerSupport
 
 
 /**
@@ -8,33 +9,12 @@ import org.apache.tapestry5.json.{JSONArray, JSONObject}
  *
  * @author jcai
  */
-object StockAlgorithm {
-  /**
-   * 利用直线拟合求出一段时间内股价的趋势
-   *
-   * @param xx 时间序列
-   * @param yy 股价序列,长度要和xx保持一致
-   * @return 斜率, 斜率为负值, 则表明股价可能下挫，可以卖空，为正值，则股价上升，可以买入
-   */
-  def lineSimulate(xx: Array[Int], yy: Array[Double]): Double = {
-    var yysum: Double = 0
-    var xxsum: Double = 0
-    var xxyy: Double = 0
-    var xxxx: Double = 0
-
-    0.until(xx.length).foreach {
-      case i =>
-        xxsum += xx(i)
-        yysum += yy(i)
-        xxyy += xx(i) * yy(i)
-        xxxx += xx(i) * xx(i)
-    }
-    val D: Double = (xxsum * xxsum - xx.length * xxxx)
-    val a: Double = (yysum * xxsum - xx.length * xxyy) / D
-    //val b = (xxsum * xxyy - yysum * xxxx) / D
-    return a
-  }
-
+object StockAlgorithm
+  extends LoggerSupport
+  with SMA
+  with EMA
+  with MACD
+  with Trend {
   /**
    * 计算day_len天数内股价的强度系数
    *
@@ -58,8 +38,10 @@ object StockAlgorithm {
         val l: Double = obj.getDouble("l")
         Math.log(l + (h - l) / 2)
     }.toArray
-    return StockAlgorithm.lineSimulate(xx, yy)
+    
+    trend(xx, yy)
   }
+
 
   def average(data: Array[Double], from: Int, until: Int): Double = {
     val subArray = data.slice(from, until)
