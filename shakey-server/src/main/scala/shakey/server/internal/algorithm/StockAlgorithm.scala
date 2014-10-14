@@ -11,7 +11,8 @@ import shakey.services.LoggerSupport
  */
 object StockAlgorithm
   extends LoggerSupport
-  with SMA {
+  with SMA
+  with EMA{
   /**
    * 利用直线拟合求出一段时间内股价的趋势
    *

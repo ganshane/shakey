@@ -12,7 +12,7 @@ trait SMA {
    * @param returnImmatureValues Determines whether immature values should be taken int account
    * @return sma result
    */
-  def SMA(input: Array[Double], periods: Int, returnImmatureValues: Boolean = false, scale: Int = 2): Stream[BigDecimal] = {
+  def SMA(input: Array[Double], periods: Int, returnImmatureValues: Boolean = false): Stream[BigDecimal] = {
     if (returnImmatureValues) {
       Range(0, input.length).toStream.map {
         case i =>
