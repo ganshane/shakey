@@ -38,7 +38,8 @@ object StockAlgorithm
         val l: Double = obj.getDouble("l")
         Math.log(l + (h - l) / 2)
     }.toArray
-    return StockAlgorithm.lineSimulate(xx, yy)
+    
+    trend(xx, yy)
   }
 
 
