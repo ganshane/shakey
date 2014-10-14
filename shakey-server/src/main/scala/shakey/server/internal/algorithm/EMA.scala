@@ -16,7 +16,7 @@ trait EMA {
    */
   def EMA(input:Array[Double], period:Int)=
   {
-    val multiplier = BigDecimal(2.0) / (period + 1);
+    val multiplier = BigDecimal(2.0) / (period + 1)
     val initialSMA = input.take(period).map(BigDecimal(_)).sum / period
 
     //从周期起始位置开始计算EMA
@@ -31,7 +31,7 @@ trait EMA {
   }
 
   def EMA(input: Stream[Double], period: Int) = {
-    val multiplier = BigDecimal(2.0) / (period + 1);
+    val multiplier = BigDecimal(2.0) / (period + 1)
 
     val initialSMA = input.take(period).map(BigDecimal(_)).sum / period
 
@@ -48,7 +48,7 @@ trait EMA {
   def EMA1(input:Array[Double], period:Int)=
   {
     val returnValues = new ListBuffer[BigDecimal]()
-    val multiplier = BigDecimal(2.0) / (period + 1);
+    val multiplier = BigDecimal(2.0) / (period + 1)
     val initialSMA = input.take(period).map(BigDecimal(_)).sum / period
 
     returnValues += initialSMA

@@ -60,10 +60,11 @@ object StockAlgorithm
         xxyy += xx(i) * yy(i)
         xxxx += xx(i) * xx(i)
     }
-    val D: Double = (xxsum * xxsum - xx.length * xxxx)
+    val D: Double = xxsum * xxsum - xx.length * xxxx
     val a: Double = (yysum * xxsum - xx.length * xxyy) / D
     //val b = (xxsum * xxyy - yysum * xxxx) / D
-    return a
+
+    a
   }
 
   def average(data: Array[Double], from: Int, until: Int): Double = {

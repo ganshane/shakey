@@ -26,7 +26,7 @@ trait MACD {
         (fastValue - slowValue).setScale(2, RoundingMode.HALF_UP).doubleValue()
     }
 
-    val signal = EMA(MACD, signalPeriod);
+    val signal = EMA(MACD, signalPeriod)
 
     signal
   }
