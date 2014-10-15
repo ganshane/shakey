@@ -53,10 +53,16 @@ Function GetJRE
   ReadRegStr $R1 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
   ReadRegStr $R0 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment\$R1" "JavaHome"
   StrCpy $R0 "$R0\bin\${JAVAEXE}"
- 
-  IfErrors 0 JreFound  ;; 3) found it in the registry
-  StrCpy $R0 "${JAVAEXE}"  ;; 4) wishing you good luck
- 
+  IfErrors 0 JreFound  ;; 3) found it in the jre registry
+
+  ClearErrors
+  ReadRegStr $R1 HKLM "SOFTWARE\JavaSoft\Java Development Kit" "CurrentVersion"
+  ReadRegStr $R0 HKLM "SOFTWARE\JavaSoft\Java Development Kit\$R1" "JavaHome"
+  StrCpy $R0 "$R0\bin\${JAVAEXE}"
+  IfErrors 0 JreFound  ;; 4) found it in the jdk registry
+
+  StrCpy $R0 "${JAVAEXE}"  ;; 5) wishing you good luck
+
  JreFound:
   Pop $R1
   Exch $R0
