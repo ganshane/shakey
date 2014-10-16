@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "触碰支撑位和阻力位股票分析${date_title}"
+title:  "触碰支撑位或阻力位股票分析${date_title}"
 date:   ${date}
 categories: stock
 ---
