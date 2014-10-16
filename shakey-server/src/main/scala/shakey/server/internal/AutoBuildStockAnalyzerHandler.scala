@@ -1,9 +1,10 @@
 package shakey.server.internal
 
-import com.lmax.disruptor.EventHandler
-import shakey.server.services.StockAnalyzer
 import java.io.{FileWriter, Writer}
+
+import com.lmax.disruptor.EventHandler
 import shakey.server.internal.StockAnalyzerApp.StockDayEvent
+import shakey.server.services.StockAnalyzer
 import shakey.services.LoggerSupport
 
 /**
@@ -26,7 +27,7 @@ class AutoBuildStockAnalyzerHandler(analyzer: StockAnalyzer, writer: Writer, cou
       return
     }
     val data = event.dayData
-    if (data.length() <= 20)
+    if (data == null || data.length() <= 60)
       return
     analyzer.processStockDataInOneYear(event.symbol, data)
   }
