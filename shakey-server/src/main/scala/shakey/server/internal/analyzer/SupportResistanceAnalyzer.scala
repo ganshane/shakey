@@ -30,9 +30,9 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
     val priceStream = Range(begin, len).map { case i =>
       val stock = data.getJSONObject(i)
       (BigDecimal(stock.getDouble("l")), BigDecimal(stock.getDouble("h")), stock.getString("d"))
-    }.toArray
+    }.toStream
     //先查找支撑位
-    var sma = StockAlgorithm.EMA(priceStream.toStream.map(_._1), 5)
+    var sma = StockAlgorithm.EMA(priceStream.map(_._1), 5)
     sma = StockAlgorithm.EMA(sma, 5)
 
     val (upSupportIndex, _, downSupportIndex, _) = findSupportAndResistance(sma)
