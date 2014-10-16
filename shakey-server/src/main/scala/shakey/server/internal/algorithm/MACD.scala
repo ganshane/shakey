@@ -1,7 +1,5 @@
 package shakey.server.internal.algorithm
 
-import scala.math.BigDecimal.RoundingMode
-
 /**
  * Calculates Moving Average Convergence-Divergence (MACD) indicator
  */
@@ -23,7 +21,7 @@ trait MACD {
 
     val MACD = fastEMA.zip(slowEMA).map {
       case (fastValue, slowValue) =>
-        (fastValue - slowValue).setScale(2, RoundingMode.HALF_UP).doubleValue()
+        fastValue - slowValue
     }
 
     val signal = EMA(MACD, signalPeriod)
