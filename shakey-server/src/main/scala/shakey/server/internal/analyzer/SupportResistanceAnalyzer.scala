@@ -58,7 +58,16 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
       downResistance = priceStream.slice(size - downResistanceIndex - 3, size - downResistanceIndex + 1).map(_._2).max.doubleValue()
     }
 
-    list += new SupportResistanceStock(symbol, upSupport, upResistance, downSupport, downResistance)
+    val arr = Array(upSupport, upResistance, downSupport, downResistance).sorted
+    val currentObj = data.getJSONObject(len - 1)
+    val current = (currentObj.getDouble("h"), currentObj.getDouble("l"))
+    val hRate = ((math.abs(arr(1) - current._1)) * 10000 / current._1).asInstanceOf[Int]
+    val lRate = ((math.abs(arr(2) - current._2)) * 10000 / current._2).asInstanceOf[Int]
+
+    val rate = math.min(hRate, lRate)
+    if (rate < 80) {
+      list += new SupportResistanceStock(symbol, 100 - rate, upSupport, upResistance, downSupport, downResistance)
+    }
   }
 
   def findSupportAndResistance(sma: Stream[BigDecimal]) = {
@@ -128,13 +137,18 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
    * @param model 模板数据
    */
   override def addDataToTemplateAfterAnalysis(model: util.HashMap[AnyRef, AnyRef]): Unit = {
-    model.put("stocks", list.toArray)
+    model.put("stocks", list.sorted.toArray)
   }
 
-  class SupportResistanceStock(val symbol: String, val upSupport: Double,
+  class SupportResistanceStock(val symbol: String,
+                               val rate: Int,
+                               val upSupport: Double,
                                val upResistance: Double,
                                val downSupport: Double,
-                               val downResistance: Double) {
+                               val downResistance: Double) extends Comparable[SupportResistanceStock] {
+    override def compareTo(o: SupportResistanceStock): Int = {
+      o.rate.compareTo(rate)
+    }
   }
 
 }
