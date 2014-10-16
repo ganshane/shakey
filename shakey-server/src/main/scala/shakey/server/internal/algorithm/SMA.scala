@@ -27,4 +27,20 @@ trait SMA {
       }
     }
   }
+
+  def SMAWithStream(input: Stream[BigDecimal], periods: Int, returnImmatureValues: Boolean = false): Stream[BigDecimal] = {
+    if (returnImmatureValues) {
+      Range(0, input.length).toStream.map {
+        case i =>
+          val from = if (i + 1 > periods) i + 1 - periods else 0
+          val size = if (i >= periods) periods else i + 1
+          input.slice(from, from + size).sum / periods
+      }
+    } else {
+      Range(0, input.length - periods + 1).toStream.map {
+        case i =>
+          input.slice(i, i + periods).sum / periods
+      }
+    }
+  }
 }
