@@ -29,7 +29,9 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
     //计算中间值的股价列表
     val priceStream = Range(begin, len).map { case i =>
       val stock = data.getJSONObject(i)
+      //val midPoint = (BigDecimal(stock.getDouble("l")) + BigDecimal(stock.getDouble("h"))) /2
       (BigDecimal(stock.getDouble("l")), BigDecimal(stock.getDouble("h")), stock.getString("d"))
+      //(midPoint,midPoint, stock.getString("d"))
     }.toStream
     //先查找支撑位
     var sma = StockAlgorithm.EMA(priceStream.map(_._1), 5)
@@ -71,9 +73,20 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
     val hRate = (math.abs(arr(1) - current._1) * 10000 / current._1).asInstanceOf[Int]
     val lRate = (math.abs(current._2 - arr(2)) * 10000 / current._2).asInstanceOf[Int]
 
+
+    val color =
+      if (hRate > lRate) {
+        //接近上方，则碰到阻力位
+        if (current._3 > arr(0)) //突破上方的支撑位
+          "green"
+        else
+          "red"
+      } else {
+        "green"
+      }
     val rate = math.min(hRate, lRate)
     if (rate < 80) {
-      list += new SupportResistanceStock(symbol, 100 - rate, upSupport, upResistance, downSupport, downResistance)
+      list += new SupportResistanceStock(symbol, 100 - rate, upSupport, upResistance, downSupport, downResistance, color)
     }
   }
 
@@ -152,7 +165,8 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
                                val upSupport: Double,
                                val upResistance: Double,
                                val downSupport: Double,
-                               val downResistance: Double) extends Comparable[SupportResistanceStock] {
+                               val downResistance: Double,
+                               val color: String) extends Comparable[SupportResistanceStock] {
     override def compareTo(o: SupportResistanceStock): Int = {
       o.rate.compareTo(rate)
     }
