@@ -8,7 +8,7 @@ categories: stock
 <script type="text/javascript">
 var stockList = []
 <#list stocks as s>
-stockList.push('gb_${s.symbol()}');
+stockList.push('gb_${s.symbol()?lower_case}');
 </#list>
 </script>
 <table border="1">
@@ -23,7 +23,7 @@ stockList.push('gb_${s.symbol()}');
  <td>支撑2</td>
 </tr>
 <#list stocks as s>
-  <tr id="${s.symbol()}">
+  <tr id="${s.symbol()?lower_case}">
   <td><a href="http://stock.finance.sina.com.cn/usstock/quotes/${s.symbol()}.html" target="_blank">${s.symbol()}</a></td><td></td><td></td><td>${s.rate()}</td><td>${s.upSupport()}</td><td>${s.upResistance()}</td><td>${s.downSupport()}</td><td>${s.downResistance()}</td></tr>
 </#list>
 </table>

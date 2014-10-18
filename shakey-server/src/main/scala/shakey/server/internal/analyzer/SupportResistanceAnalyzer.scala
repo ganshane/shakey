@@ -73,7 +73,7 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
 
     val rate = math.min(hRate, lRate)
     if (rate < 80) {
-      list += new SupportResistanceStock(symbol.toLowerCase, 100 - rate, upSupport, upResistance, downSupport, downResistance)
+      list += new SupportResistanceStock(symbol, 100 - rate, upSupport, upResistance, downSupport, downResistance)
     }
   }
 
