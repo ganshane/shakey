@@ -58,15 +58,22 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
       downResistance = priceStream.slice(size - downResistanceIndex - 3, size - downResistanceIndex + 1).map(_._2).max.doubleValue()
     }
 
-    val arr = Array(upSupport, upResistance, downSupport, downResistance).sorted
     val currentObj = data.getJSONObject(len - 1)
-    val current = (currentObj.getDouble("h"), currentObj.getDouble("l"))
-    val hRate = ((math.abs(arr(1) - current._1)) * 10000 / current._1).asInstanceOf[Int]
-    val lRate = ((math.abs(arr(2) - current._2)) * 10000 / current._2).asInstanceOf[Int]
+    val current = (currentObj.getDouble("h"), currentObj.getDouble("l"), currentObj.getDouble("c"))
+    val arr = Array(upSupport, upResistance, downSupport, downResistance).sorted
+    //策略1 如果支撑和阻力相隔较小，跳过
+    val changeRate = (arr(2) - arr(1)) / current._3
+    if (changeRate < 0.0618) {
+      //波动小
+      return
+    }
+    //策略2,求比例
+    val hRate = (math.abs(arr(1) - current._1) * 10000 / current._1).asInstanceOf[Int]
+    val lRate = (math.abs(current._2 - arr(2)) * 10000 / current._2).asInstanceOf[Int]
 
     val rate = math.min(hRate, lRate)
     if (rate < 80) {
-      list += new SupportResistanceStock(symbol, 100 - rate, upSupport, upResistance, downSupport, downResistance)
+      list += new SupportResistanceStock(symbol.toLowerCase, 100 - rate, upSupport, upResistance, downSupport, downResistance)
     }
   }
 
