@@ -61,7 +61,7 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
     }
 
     val currentObj = data.getJSONObject(len - 1)
-    val current = (currentObj.getDouble("h"), currentObj.getDouble("l"), currentObj.getDouble("c"))
+    val current = (currentObj.getDouble("l"), currentObj.getDouble("h"), currentObj.getDouble("c"))
     val arr = Array(upSupport, upResistance, downSupport, downResistance).sorted
     //策略1 如果支撑和阻力相隔较小，跳过
     val changeRate = (arr(2) - arr(1)) / current._3
@@ -70,14 +70,14 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
       return
     }
     //策略2,求比例
-    val hRate = (math.abs(arr(1) - current._1) * 10000 / current._1).asInstanceOf[Int]
-    val lRate = (math.abs(current._2 - arr(2)) * 10000 / current._2).asInstanceOf[Int]
+    val hRate = (math.abs(arr(2) - current._2) * 10000 / current._2).asInstanceOf[Int]
+    val lRate = (math.abs(current._1 - arr(1)) * 10000 / current._1).asInstanceOf[Int]
 
 
     val color =
-      if (hRate > lRate) {
+      if (hRate < lRate) {
         //接近上方，则碰到阻力位
-        if (current._3 > arr(0)) //突破上方的支撑位
+        if (current._3 > arr(2)) //突破上方的支撑位
           "green"
         else
           "red"
