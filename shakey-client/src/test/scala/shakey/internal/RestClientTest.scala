@@ -3,7 +3,6 @@ package shakey.internal
 import java.io.{File, FileOutputStream}
 
 import org.apache.commons.io.{FileUtils, IOUtils}
-import org.junit.Test
 import shakey.services.LoggerSupport
 
 /**
@@ -11,7 +10,7 @@ import shakey.services.LoggerSupport
  */
 class RestClientTest extends LoggerSupport {
 
-  @Test
+  //@Test
   def test {
     val header = Map[String, String](
       "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
