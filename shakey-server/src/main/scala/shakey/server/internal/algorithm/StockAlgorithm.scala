@@ -38,7 +38,18 @@ object StockAlgorithm
         val l: Double = obj.getDouble("l")
         Math.log(l + (h - l) / 2)
     }.toArray
-    
+
+    trend(xx, yy)
+  }
+
+  def calStrongRate(arr: Array[Double], day_len: Int): Double = {
+    val len: Int = arr.length
+    var size: Int = day_len
+    var begin: Int = len - size
+    if (begin < 0) begin = 0
+    size = len - begin
+    val xx = 0.until(size).toArray
+    val yy = arr.map(Math.log)
     trend(xx, yy)
   }
 

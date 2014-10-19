@@ -1,8 +1,11 @@
 package shakey.server.internal.analyzer
 
-import shakey.server.services.StockAnalyzer
-import org.apache.tapestry5.json.{JSONArray, JSONObject}
 import java.util
+
+import org.apache.tapestry5.json.{JSONArray, JSONObject}
+import shakey.server.internal.algorithm.StockAlgorithm
+import shakey.server.services.StockAnalyzer
+
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -12,6 +15,8 @@ import scala.collection.mutable.ListBuffer
  * @author jcai
  */
 class DayVolumeAnalyzer extends StockAnalyzer {
+  private val list = new ListBuffer[VolumeStock]()
+
   def processStockDataInOneYear(symbol: String, data: JSONArray) {
     val pos: Int = data.length - 1
     val current: JSONObject = data.getJSONObject(pos)
@@ -24,7 +29,11 @@ class DayVolumeAnalyzer extends StockAnalyzer {
 
     val currentVolume: Int = current.getInt("v")
     if (currentVolume > av * 2) {
-      list += new VolumeStock(symbol, currentVolume * 1.0 / av)
+      //求20天的价格强度
+      val arr = Range(pos - 1, pos - 1 - 20, -1).map(data.getJSONObject(_).getDouble("c")).toArray
+      val strongRate = StockAlgorithm.calStrongRate(arr, arr.length)
+      if (math.abs(strongRate) > 0.01)
+        list += new VolumeStock(symbol, strongRate, currentVolume * 1.0 / av)
     }
   }
 
@@ -37,11 +46,9 @@ class DayVolumeAnalyzer extends StockAnalyzer {
     return "day-volume.ftl"
   }
 
-  private val list = new ListBuffer[VolumeStock]()
-
-  class VolumeStock(val symbol: String, val rate: Double) extends Comparable[VolumeStock] {
+  class VolumeStock(val symbol: String, val strongRate: Double, val rate: Double) extends Comparable[VolumeStock] {
     def compareTo(o: VolumeStock): Int = {
-      return o.rate.compareTo(rate)
+      return math.abs(o.strongRate).compareTo(math.abs(strongRate))
     }
   }
 
