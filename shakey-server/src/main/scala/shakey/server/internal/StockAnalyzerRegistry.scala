@@ -17,6 +17,7 @@ object StockAnalyzerRegistry {
     new StrongStockAnalyzer,
     new R20Analyzer,
     new SupportResistanceAnalyzer,
+    new PullbackAnalyzer,
     new DayVolumeAnalyzer
   )
 

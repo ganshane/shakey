@@ -3,6 +3,7 @@ package shakey.internal
 import java.io.{File, FileOutputStream}
 
 import org.apache.commons.io.{FileUtils, IOUtils}
+import org.junit.Test
 import shakey.services.LoggerSupport
 
 /**
@@ -10,7 +11,7 @@ import shakey.services.LoggerSupport
  */
 class RestClientTest extends LoggerSupport {
 
-  //@Test
+  @Test
   def test {
     val header = Map[String, String](
       "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -20,7 +21,7 @@ class RestClientTest extends LoggerSupport {
       "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36"
     )
     FileUtils.forceMkdir(new File("target"))
-    val seq = 86571
+    val seq = 85571
     seq until 86765 foreach { case i =>
       logger.debug("process {}", i)
       RestClient.getStream("http://www.pristine.com/newsletterimages/%s.gif".format(i), { stream =>
