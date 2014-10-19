@@ -20,6 +20,6 @@ stockList.push('gb_${s.symbol()?lower_case}');
  <td>天量指数</td>
 </tr>
 <#list stocks as s>
-  <tr id="${s.symbol()?lower_case}"><td><a href="http://stock.finance.sina.com.cn/usstock/quotes/${s.symbol()}.html" target="_blank">${s.symbol()}</a></td><td></td><td></td><td>${sy.strongRate()}</td><td>${s.rate()}</td></tr>
+  <tr id="${s.symbol()?lower_case}"><td><a href="http://stock.finance.sina.com.cn/usstock/quotes/${s.symbol()}.html" target="_blank">${s.symbol()}</a></td><td></td><td></td><td>${s.strongRate()}</td><td>${s.rate()}</td></tr>
 </#list>
 </table>
