@@ -3,6 +3,7 @@ package shakey.server.internal.analyzer
 import java.util
 
 import org.apache.tapestry5.json.JSONArray
+import shakey.internal.StockSymbolFetcher
 import shakey.server.internal.algorithm.StockAlgorithm
 import shakey.server.services.StockAnalyzer
 
@@ -11,6 +12,13 @@ import scala.collection.mutable.ListBuffer
 /**
  * 针对股票阻力位和支撑位的分析
  */
+object SupportResistanceAnalyzer {
+  def main(args: Array[String]): Unit = {
+    val analyzer = new SupportResistanceAnalyzer
+    analyzer.processStockDataInOneYear("HAL", StockSymbolFetcher.fetchStockDayVolume("HAL"))
+  }
+}
+
 class SupportResistanceAnalyzer extends StockAnalyzer {
   private val list = new ListBuffer[SupportResistanceStock]()
 
