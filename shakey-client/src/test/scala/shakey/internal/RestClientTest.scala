@@ -21,7 +21,7 @@ class RestClientTest extends LoggerSupport {
       "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36"
     )
     FileUtils.forceMkdir(new File("target"))
-    val seq = 85571
+    val seq = 86637
     seq until 86765 foreach { case i =>
       logger.debug("process {}", i)
       RestClient.getStream("http://www.pristine.com/newsletterimages/%s.gif".format(i), { stream =>

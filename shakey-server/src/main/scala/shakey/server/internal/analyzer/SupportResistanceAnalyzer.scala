@@ -63,13 +63,23 @@ class SupportResistanceAnalyzer extends StockAnalyzer {
     val currentObj = data.getJSONObject(len - 1)
     val current = (currentObj.getDouble("l"), currentObj.getDouble("h"), currentObj.getDouble("c"))
     val arr = Array(upSupport, upResistance, downSupport, downResistance).sorted
-    //策略1 如果支撑和阻力相隔较小，跳过
+    //策略1 如果支撑或者阻力位0，则跳过
+    if (downSupportIndex == 0 && downResistanceIndex == 0)
+      return
+
+    //策略2 如果支撑和阻力的和预期不对
+    val minUp = math.min(upResistance, upSupport)
+    val maxDown = math.max(downResistance, downSupport)
+    if (maxDown > minUp)
+      return
+
+    //策略3 如果支撑和阻力相隔较小，跳过
     val changeRate = (arr(2) - arr(1)) / current._3
     if (changeRate < 0.0618) {
       //波动小
       return
     }
-    //策略2,求比例
+    //策略4,求比例
     val hRate = (math.abs(arr(2) - current._2) * 10000 / current._2).asInstanceOf[Int]
     val lRate = (math.abs(current._1 - arr(1)) * 10000 / current._1).asInstanceOf[Int]
 
