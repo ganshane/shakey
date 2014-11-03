@@ -29,8 +29,8 @@ class DayVolumeAnalyzer extends StockAnalyzer {
 
     val currentVolume: Int = current.getInt("v")
     if (currentVolume > av * 2) {
-      //求20天的价格强度
-      val arr = Range(pos - 1, pos - 1 - 20, -1).map(data.getJSONObject(_).getDouble("c")).toArray
+      //求10天的价格强度
+      val arr = Range(pos - 1, pos - 1 - 10, -1).map(data.getJSONObject(_).getDouble("c")).toArray
       val strongRate = 0 - StockAlgorithm.calStrongRate(arr, arr.length)
       if (math.abs(strongRate) > 0.01)
         list += new VolumeStock(symbol, strongRate, currentVolume * 1.0 / av)
