@@ -1,10 +1,15 @@
 package shakey.internal
 
+import java.io.File
+import java.util
+
+import org.apache.commons.io.FileUtils
 import org.apache.tapestry5.json.{JSONArray, JSONObject}
-import shakey.services.{Stock, LoggerSupport}
-import scala.collection.mutable.ArrayBuffer
-import util.control.Breaks._
 import shakey.ShakeyConstants
+import shakey.services.{LoggerSupport, Stock}
+
+import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks._
 
 
 /**
@@ -12,10 +17,12 @@ import shakey.ShakeyConstants
  */
 object StockSymbolFetcher extends LoggerSupport {
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
+    val stocks:Array[String] = fetchAllStock
+    FileUtils.writeLines(new File("shakey-server/src/main/resources/stocks"),util.Arrays.asList(stocks :_ *))
   }
 
-  def fetchAllStock(fun: (String) => Unit) {
+  def fetchAllStock(fun: (String) => Unit): Unit = {
     1 to 133 foreach {
       case page =>
         val content = RestClient.get(ShakeyConstants.US_STOCK_FORMATTER.format(page), encoding = "GBK")
@@ -36,9 +43,8 @@ object StockSymbolFetcher extends LoggerSupport {
           case j =>
             //{count:"8318",data:[{name:"Goldman Sachs Group Inc.",cname:"高盛集团",category:"",symbol:"GS",price:"184.09",diff:"-3.72",chg:"-1.98",preclose:"187.81",open:"187.46",high:"187.80",low:"183.46",amplitude:"2.31%",volume:"2999670",mktcap:"84400008279",pe:"12.12714049",market:"NYSE",category_id:"695"},
             val obj = data.getJSONObject(j)
-            if (obj.getInt("volume") > 500000 && obj.getDouble("price") > 5.0) {
+            if (isNormalStock(obj))
               fun(obj.getString("symbol"))
-            }
         }
     }
   }
@@ -65,15 +71,17 @@ object StockSymbolFetcher extends LoggerSupport {
           case j =>
             //{count:"8318",data:[{name:"Goldman Sachs Group Inc.",cname:"高盛集团",category:"",symbol:"GS",price:"184.09",diff:"-3.72",chg:"-1.98",preclose:"187.81",open:"187.46",high:"187.80",low:"183.46",amplitude:"2.31%",volume:"2999670",mktcap:"84400008279",pe:"12.12714049",market:"NYSE",category_id:"695"},
             val obj = data.getJSONObject(j)
-            if (obj.getInt("volume") > 200000 && obj.getDouble("price") > 5.0) {
+            if (isNormalStock(obj))
               buf += obj.getString("symbol")
-            }
         }
     }
 
     buf.toArray
   }
 
+  private def isNormalStock(stock: JSONObject): Boolean = {
+    stock.getInt("volume") > 500000 && stock.getDouble("price") > 5.0 && stock.getInt("mktcap") > 100000000
+  }
 
   def fetchChinaStock = {
     val buffer = new ArrayBuffer[String]()
